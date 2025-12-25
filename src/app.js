@@ -1,5 +1,161 @@
 // Redesigned by telegram.dog/TheFirstSpeedster at https://www.npmjs.com/package/@googledrive/index which was written by someone else, credits are given on Source Page.
 // v2.3.7
+
+// ============================================================================
+// FILE TYPE CONSTANTS - Centralized file extension mappings
+// ============================================================================
+const FILE_TYPES = {
+    video: ['mp4', 'webm', 'avi', 'mpg', 'mpeg', 'mkv', 'rm', 'rmvb', 'mov', 'wmv', 'asf', 'ts', 'flv', '3gp', 'm4v'],
+    audio: ['mp3', 'flac', 'wav', 'ogg', 'm4a', 'aac', 'wma', 'alac'],
+    image: ['bmp', 'jpg', 'jpeg', 'png', 'gif', 'svg', 'tiff', 'ico'],
+    code: ['php', 'css', 'go', 'java', 'js', 'json', 'txt', 'sh', 'md', 'html', 'xml', 'py', 'rb', 'c', 'cpp', 'h', 'hpp'],
+    archive: ['zip', 'rar', 'tar', '7z', 'gz'],
+    document: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'],
+    markdown: ['md']
+};
+
+// ============================================================================
+// HELPER FUNCTIONS - Reusable utilities
+// ============================================================================
+
+/**
+ * Check if a file extension belongs to a specific type
+ * @param {string} ext - File extension
+ * @param {string} type - Type name from FILE_TYPES
+ * @returns {boolean}
+ */
+function isFileType(ext, type) {
+    return FILE_TYPES[type] && FILE_TYPES[type].includes(ext?.toLowerCase());
+}
+
+/**
+ * Get the icon for a file based on its extension
+ * @param {string} ext - File extension
+ * @returns {string} - SVG icon HTML
+ */
+function getFileIcon(ext) {
+    const extLower = ext?.toLowerCase();
+    if (isFileType(extLower, 'video')) return video_icon;
+    if (isFileType(extLower, 'audio')) return audio_icon;
+    if (isFileType(extLower, 'image')) return image_icon;
+    if (isFileType(extLower, 'code')) return code_icon;
+    if (isFileType(extLower, 'archive')) return zip_icon;
+    if (isFileType(extLower, 'markdown')) return markdown_icon;
+    if (extLower === 'pdf') return pdf_icon;
+    return file_icon;
+}
+
+/**
+ * Generate breadcrumb navigation HTML for file views
+ * @param {string} path - Current URL path
+ * @param {boolean} isViewPage - Whether this is a file view page
+ * @returns {string} - HTML for breadcrumb navigation
+ */
+function generateBreadcrumb(path, isViewPage = true) {
+    const pathParts = path.split('/');
+    let navigation = '';
+    let newPath = '';
+    
+    for (let i = 0; i < pathParts.length; i++) {
+        let part = pathParts[i];
+        if (isViewPage && i === pathParts.length - 1) {
+            newPath += part + '?a=view';
+        } else {
+            newPath += part + '/';
+        }
+        
+        if (part.length > 15) {
+            part = decodeURIComponent(part);
+            part = part.substring(0, 10) + '...';
+        }
+        
+        if (part === '') {
+            part = 'Home';
+        }
+        
+        navigation += '<a href="' + newPath + '" class="breadcrumb-item">' + part + '</a>';
+    }
+    
+    return navigation;
+}
+
+/**
+ * Generate download button dropdown with various app integrations
+ * @param {string} url - Download URL
+ * @param {string} encodedName - URL-encoded filename
+ * @param {boolean} isVideo - Whether this is a video file
+ * @returns {string} - HTML for dropdown menu
+ */
+function generateDownloadDropdown(url, encodedName, isVideo = false) {
+    let dropdown = '';
+    
+    if (isVideo) {
+        dropdown += `
+            <a class="dropdown-item" href="iina://weblink?url=${url}">IINA</a>
+            <a class="dropdown-item" href="potplayer://${url}">PotPlayer</a>
+            <a class="dropdown-item" href="vlc://${url}">VLC Mobile</a>
+            <a class="dropdown-item" href="${url}">VLC Desktop</a>
+            <a class="dropdown-item" href="nplayer-${url}">nPlayer</a>
+            <a class="dropdown-item" href="intent://${url}#Intent;type=video/any;package=is.xyz.mpv;scheme=https;end;">mpv-android</a>
+            <a class="dropdown-item" href="mpv://${btoa(url)}">mpv x64</a>
+            <a class="dropdown-item" href="intent:${url}#Intent;package=com.mxtech.videoplayer.ad;S.title=${encodedName};end">MX Player (Free)</a>
+            <a class="dropdown-item" href="intent:${url}#Intent;package=com.mxtech.videoplayer.pro;S.title=${encodedName};end">MX Player (Pro)</a>`;
+    }
+    
+    dropdown += `
+        <a class="dropdown-item" href="intent:${url}#Intent;component=idm.internet.download.manager/idm.internet.download.manager.Downloader;S.title=${encodedName};end">1DM (Free)</a>
+        <a class="dropdown-item" href="intent:${url}#Intent;component=idm.internet.download.manager.adm.lite/idm.internet.download.manager.Downloader;S.title=${encodedName};end">1DM (Lite)</a>
+        <a class="dropdown-item" href="intent:${url}#Intent;component=idm.internet.download.manager.plus/idm.internet.download.manager.Downloader;S.title=${encodedName};end">1DM+ (Plus)</a>`;
+    
+    return dropdown;
+}
+
+/**
+ * Create a standard file view container with card layout
+ * @param {Object} options - Configuration object
+ * @returns {string} - HTML content
+ */
+function createFileViewContainer(options) {
+    const { name, size, url, encodedName, navigation, bodyContent = '', isVideo = false, showDownload = true } = options;
+    
+    const downloadSection = showDownload ? `
+        <div class="card-body">
+            <div class="input-group mb-4">
+                <input type="text" class="form-control" id="dlurl" value="${url}" readonly>
+            </div>
+            <div class="card-text text-center">
+                <div class="btn-group text-center">
+                    <a href="${url}" type="button" class="btn btn-primary">Download</a>
+                    <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="sr-only"></span>
+                    </button>
+                    <div class="dropdown-menu">
+                        ${generateDownloadDropdown(url, encodedName, isVideo)}
+                    </div>
+                </div>
+            </div>
+            <br>
+        </div>` : '';
+    
+    return `
+        <div class="container text-center"><br>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">${navigation}</ol>
+            </nav>
+            <div class="card text-center">
+                <div class="card-body text-center">
+                    <div class="${UI.file_view_alert_class}" id="file_details" role="alert">${name}<br>${size}</div>
+                </div>
+                ${bodyContent}
+                ${downloadSection}
+            </div>
+        </div>`;
+}
+
+// ============================================================================
+// MAIN APPLICATION CODE
+// ============================================================================
+
 // Initialize the page
 function init() {
     document.siteName = $('title').html();
@@ -578,23 +734,8 @@ function append_files_to_fallback_list(path, files) {
                 //}
                 html += `<div class="list-group-item list-group-item-action">${UI.allow_selecting_files ? '<input class="form-check-input" style="margin-top: 0.3em;margin-right: 0.5em;" type="checkbox" value="'+link+'" id="flexCheckDefault">' : ''}`;
 
-                if ("|mp4|webm|avi|mpg|mpeg|mkv|rm|rmvb|mov|wmv|asf|ts|flv|".indexOf(`|${ext}|`) >= 0) {
-                    html += video_icon;
-                } else if ("|html|php|css|go|java|js|json|txt|sh|".indexOf(`|${ext}|`) >= 0) {
-                    html += code_icon;
-                } else if ("|zip|rar|tar|.7z|.gz|".indexOf(`|${ext}|`) >= 0) {
-                    html += zip_icon;
-                } else if ("|bmp|jpg|jpeg|png|gif|".indexOf(`|${ext}|`) >= 0) {
-                    html += image_icon;
-                } else if ("|m4a|mp3|flac|wav|ogg|".indexOf(`|${ext}|`) >= 0) {
-                    html += audio_icon;
-                } else if ("|md|".indexOf(`|${ext}|`) >= 0) {
-                    html += markdown_icon;
-                } else if ("|pdf|".indexOf(`|${ext}|`) >= 0) {
-                    html += pdf_icon;
-                } else {
-                    html += file_icon;
-                }
+                // Use centralized getFileIcon helper
+                html += getFileIcon(ext);
 
                 html += ` <a class="countitems size_items list-group-item-action" style="text-decoration: none; color: ${UI.css_a_tag_color};" href="${p}&a=view">${item.name}</a>${UI.display_download ? `<a href="${link}"><svg class="float-end"width="25px" style="margin-left: 8px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"> <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"></path> <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"></path> </svg></a>` : ``}${UI.display_size ? `<span class="badge bg-primary float-end"> ` + item['size'] + ` </span>` : ``}${UI.display_time ? ` <span class="badge bg-info float-end"> ` + item['modifiedTime'] + ` </span>` : ``}</div>`;
             }
@@ -720,23 +861,8 @@ function append_files_to_list(path, files) {
             //}
             html += `<div class="list-group-item list-group-item-action">${UI.allow_selecting_files ? '<input class="form-check-input" style="margin-top: 0.3em;margin-right: 0.5em;" type="checkbox" value="'+link+'" id="flexCheckDefault">' : ''}`;
 
-            if ("|mp4|webm|avi|mpg|mpeg|mkv|rm|rmvb|mov|wmv|asf|ts|flv|".indexOf(`|${ext}|`) >= 0) {
-                html += video_icon;
-            } else if ("|html|php|css|go|java|js|json|txt|sh|".indexOf(`|${ext}|`) >= 0) {
-                html += code_icon;
-            } else if ("|zip|rar|tar|.7z|.gz|".indexOf(`|${ext}|`) >= 0) {
-                html += zip_icon;
-            } else if ("|bmp|jpg|jpeg|png|gif|".indexOf(`|${ext}|`) >= 0) {
-                html += image_icon;
-            } else if ("|m4a|mp3|flac|wav|ogg|".indexOf(`|${ext}|`) >= 0) {
-                html += audio_icon;
-            } else if ("|md|".indexOf(`|${ext}|`) >= 0) {
-                html += markdown_icon;
-            } else if ("|pdf|".indexOf(`|${ext}|`) >= 0) {
-                html += pdf_icon;
-            } else {
-                html += file_icon;
-            }
+            // Use centralized getFileIcon helper
+            html += getFileIcon(ext);
 
             html += ` <a class="countitems size_items list-group-item-action" style="text-decoration: none; color: ${UI.css_a_tag_color};" href="${pn}">${item.name}</a>${UI.display_download ? `<a href="${link}"><svg class="float-end"width="25px" style="margin-left: 8px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"> <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"></path> <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"></path> </svg></a>` : ``}${UI.display_size ? `<span class="badge bg-primary float-end"> ` + item['size'] + ` </span>` : ``}${UI.display_time ? ` <span class="badge bg-info float-end"> ` + item['modifiedTime'] + ` </span>` : ``}</div>`;
         }
@@ -986,23 +1112,8 @@ function append_search_result_to_list(files) {
                 const link = UI.second_domain_for_dl ? UI.downloaddomain + item.link : window.location.origin + item.link;
                 html += `<div style="color: ${UI.css_a_tag_color};" gd-type="$item['mimeType']}" class="countitems size_items list-group-item list-group-item-action">${UI.allow_selecting_files ? '<input class="form-check-input" style="margin-top: 0.3em;margin-right: 0.5em;" type="checkbox" value="'+link+'" id="flexCheckDefault">' : ''}`;
 
-                if ("|mp4|webm|avi|mpg|mpeg|mkv|rm|rmvb|mov|wmv|asf|ts|flv|".indexOf(`|${ext}|`) >= 0) {
-                    html += video_icon;
-                } else if ("|html|php|css|go|java|js|json|txt|sh|".indexOf(`|${ext}|`) >= 0) {
-                    html += code_icon;
-                } else if ("|zip|rar|tar|.7z|.gz|".indexOf(`|${ext}|`) >= 0) {
-                    html += zip_icon;
-                } else if ("|bmp|jpg|jpeg|png|gif|".indexOf(`|${ext}|`) >= 0) {
-                    html += image_icon;
-                } else if ("|m4a|mp3|flac|wav|ogg|".indexOf(`|${ext}|`) >= 0) {
-                    html += audio_icon;
-                } else if ("|md|".indexOf(`|${ext}|`) >= 0) {
-                    html += markdown_icon;
-                } else if ("|pdf|".indexOf(`|${ext}|`) >= 0) {
-                    html += pdf_icon;
-                } else {
-                    html += file_icon;
-                }
+                // Use centralized getFileIcon helper
+                html += getFileIcon(ext);
 
                 html += ` <span onclick="onSearchResultItemClick('${item['id']}', true)" data-bs-toggle="modal" data-bs-target="#SearchModel">${item.name}</span>${UI.display_download ? `<a href="${link}"><svg class="float-end"width="25px" style="margin-left: 8px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"> <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"></path> <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"></path> </svg></a>` : ``}<span class="badge float-end csize"> ${UI.display_size ? `<span class="badge bg-primary float-end"> ` + item['size'] + ` </span>` : ``}${UI.display_time ? ` <span class="badge bg-info float-end"> ` + item['modifiedTime'] + ` </span>` : ``}</div>`;
 
