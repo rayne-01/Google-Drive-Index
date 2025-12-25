@@ -1,19 +1,47 @@
 {
   "name": "@googledrive/index",
   "version": "2.3.7",
+  "description": "Google Drive Index - A serverless Google Drive directory listing on Cloudflare Workers",
   "private": false,
+  "main": "src/worker.js",
   "scripts": {
-    "deploy": "wrangler publish",
-    "start": "wrangler dev"
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "publish": "wrangler deploy",
+    "start": "wrangler dev",
+    "lint": "eslint src/ assets/",
+    "lint:fix": "eslint src/ assets/ --fix",
+    "format": "prettier --write \"src/**/*.js\" \"assets/**/*.js\"",
+    "format:check": "prettier --check \"src/**/*.js\" \"assets/**/*.js\"",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run lint && npm run format:check && npm run typecheck",
+    "precommit": "npm run check"
+  },
+  "keywords": [
+    "google-drive",
+    "cloudflare-workers",
+    "serverless",
+    "file-index",
+    "directory-listing"
+  ],
+  "author": "Parveen Bhadoo",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.com/GoogleDriveIndex/Google-Drive-Index"
+  },
+  "bugs": {
+    "url": "https://gitlab.com/GoogleDriveIndex/Google-Drive-Index/-/issues"
+  },
+  "homepage": "https://gdi.js.org",
+  "engines": {
+    "node": ">=18.0.0"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20230419.0",
-    "typescript": "^5.0.4",
-    "wrangler": "^3.4.0"
-  },
-  "description": "* Mongodb DB Implementation, may or may not be done in future, no ETA\r * Admin Page to Handle Index Better, eg. Database access, adding users, deleting users etc., no ETA\r * Rewriting Documentation, no ETA. Anyone can Help",
-  "main": "index.js",
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+    "@cloudflare/workers-types": "^4.20241218.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2",
+    "wrangler": "^3.99.0"
+  }
 }
