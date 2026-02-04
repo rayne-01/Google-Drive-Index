@@ -25,31 +25,36 @@ preview_id = "YOUR_PREVIEW_KV_NAMESPACE_ID"
 command = "npm install && npx wrangler deploy"
 
 # ============================================================================
-# ENVIRONMENT VARIABLES (visible, non-sensitive configuration)
+# ALL CONFIGURATION (visible as plain text in Cloudflare dashboard)
 # ============================================================================
 [vars]
 ENVIRONMENT = "production"
-REDIRECT_DOMAIN = ""                    # e.g., "https://your-worker.workers.dev"
+
+# Google OAuth2 Credentials
+CLIENT_ID = ""                          # Client ID from Google Cloud Console
+CLIENT_SECRET = ""                      # Client Secret from Google Cloud Console
+REFRESH_TOKEN = ""                      # Refresh Token from OAuth2 flow
+
+# Login System (optional)
 ENABLE_LOGIN = "false"                  # "true" or "false"
 ENABLE_SIGNUP = "false"                 # "true" or "false"
-BLOCKED_REGIONS = ""                    # Comma-separated: "IN,US,PK"
-BLOCKED_ASN = ""                        # Comma-separated: "16509,12345"
+REDIRECT_DOMAIN = ""                    # e.g., "https://your-worker.workers.dev"
+GOOGLE_CLIENT_ID_FOR_LOGIN = ""         # Google Client ID for user login
+GOOGLE_CLIENT_SECRET_FOR_LOGIN = ""     # Google Client Secret for user login
+
+# Site Settings
 SITE_NAME = "Google Drive Index"
 DOWNLOAD_MODE = "path"                  # "path" or "id"
 FILES_LIST_PAGE_SIZE = "100"
 SEARCH_PAGE_SIZE = "100"
 
-# ============================================================================
-# SECRETS (use `wrangler secret put <NAME>` for these)
-# ============================================================================
-# Run these commands to set secrets (they will be hidden/masked):
-#   wrangler secret put CLIENT_ID
-#   wrangler secret put CLIENT_SECRET
-#   wrangler secret put REFRESH_TOKEN
-#   wrangler secret put GOOGLE_CLIENT_ID_FOR_LOGIN
-#   wrangler secret put GOOGLE_CLIENT_SECRET_FOR_LOGIN
-#   wrangler secret put CRYPTO_BASE_KEY
-#   wrangler secret put HMAC_BASE_KEY
+# Blocking (comma-separated)
+BLOCKED_REGIONS = ""                    # e.g., "IN,US,PK"
+BLOCKED_ASN = ""                        # e.g., "16509,12345"
+
+# Cryptographic Keys (generate your own!)
+CRYPTO_BASE_KEY = ""                    # 256-bit key for AES encryption
+HMAC_BASE_KEY = ""                      # 256-bit key for HMAC
 
 [env.production]
 name = "google-drive-index"
