@@ -24,6 +24,32 @@ preview_id = "YOUR_PREVIEW_KV_NAMESPACE_ID"
 [build]
 command = "npm install && npx wrangler deploy"
 
+# ============================================================================
+# ENVIRONMENT VARIABLES (visible, non-sensitive configuration)
+# ============================================================================
+[vars]
+ENVIRONMENT = "production"
+REDIRECT_DOMAIN = ""                    # e.g., "https://your-worker.workers.dev"
+ENABLE_LOGIN = "false"                  # "true" or "false"
+ENABLE_SIGNUP = "false"                 # "true" or "false"
+BLOCKED_REGIONS = ""                    # Comma-separated: "IN,US,PK"
+BLOCKED_ASN = ""                        # Comma-separated: "16509,12345"
+SITE_NAME = "Google Drive Index"
+DOWNLOAD_MODE = "path"                  # "path" or "id"
+FILES_LIST_PAGE_SIZE = "100"
+SEARCH_PAGE_SIZE = "100"
+
+# ============================================================================
+# SECRETS (use `wrangler secret put <NAME>` for these)
+# ============================================================================
+# Run these commands to set secrets (they will be hidden/masked):
+#   wrangler secret put CLIENT_ID
+#   wrangler secret put CLIENT_SECRET
+#   wrangler secret put REFRESH_TOKEN
+#   wrangler secret put GOOGLE_CLIENT_ID_FOR_LOGIN
+#   wrangler secret put GOOGLE_CLIENT_SECRET_FOR_LOGIN
+#   wrangler secret put CRYPTO_BASE_KEY
+#   wrangler secret put HMAC_BASE_KEY
+
 [env.production]
 name = "google-drive-index"
-vars = { ENVIRONMENT = "production" }

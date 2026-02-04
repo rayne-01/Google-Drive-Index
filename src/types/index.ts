@@ -327,9 +327,31 @@ export interface LocalStorageCache {
 // ============================================================================
 
 export interface Env {
+  // Bindings
   ENV?: KVNamespace;
   DB?: D1Database;
   HYPERDRIVE?: any;
+
+  // Non-sensitive environment variables (visible in dashboard)
+  ENVIRONMENT?: string;
+  REDIRECT_DOMAIN?: string;
+  ENABLE_LOGIN?: string;
+  ENABLE_SIGNUP?: string;
+  BLOCKED_REGIONS?: string;
+  BLOCKED_ASN?: string;
+  SITE_NAME?: string;
+  DOWNLOAD_MODE?: string;
+  FILES_LIST_PAGE_SIZE?: string;
+  SEARCH_PAGE_SIZE?: string;
+
+  // Secrets (masked in dashboard, set via `wrangler secret put`)
+  CLIENT_ID?: string;
+  CLIENT_SECRET?: string;
+  REFRESH_TOKEN?: string;
+  GOOGLE_CLIENT_ID_FOR_LOGIN?: string;
+  GOOGLE_CLIENT_SECRET_FOR_LOGIN?: string;
+  CRYPTO_BASE_KEY?: string;
+  HMAC_BASE_KEY?: string;
 }
 
 // ============================================================================

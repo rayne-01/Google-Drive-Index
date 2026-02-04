@@ -3,7 +3,7 @@
  * @version 3.0.0
  */
 
-import { config } from '../config';
+import { config, applyEnvConfig } from '../config';
 import { initDrives, getDrive, getAllDrives, GoogleDrive } from '../services/drive';
 import { validateSession, handleLogin, handleSignup, handleLogout, requiresAuth } from '../services/auth';
 import { encryptString, decryptString, generateDownloadLink, verifyDownloadLink } from '../utils/crypto';
@@ -19,6 +19,9 @@ import type { Env, DriveFile, ListRequestBody, SearchRequestBody, ConfigBackend 
  */
 export async function handleRequest(request: Request, env?: Env): Promise<Response> {
   try {
+    // Apply environment variables to config
+    applyEnvConfig(env);
+
     const url = new URL(request.url);
     const path = url.pathname;
     const userIp = request.headers.get('CF-Connecting-IP') || '';
