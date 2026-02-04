@@ -128,49 +128,57 @@ export async function handleSetup(request: Request, env: Env): Promise<Response>
  */
 async function handleInitDB(env: Env): Promise<Response> {
   try {
-    await env.DB.exec(`
-      -- Config table (stores all settings)
-      CREATE TABLE IF NOT EXISTS config (
-        key TEXT PRIMARY KEY,
-        value TEXT NOT NULL,
-        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-      );
+    // Create tables one by one using batch
+    const statements = [
+      // Config table
+      env.DB.prepare(`
+        CREATE TABLE IF NOT EXISTS config (
+          key TEXT PRIMARY KEY,
+          value TEXT NOT NULL,
+          updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+      `),
+      // Drives table
+      env.DB.prepare(`
+        CREATE TABLE IF NOT EXISTS drives (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          drive_id TEXT NOT NULL UNIQUE,
+          name TEXT NOT NULL,
+          order_index INTEGER DEFAULT 0,
+          protect_file_link INTEGER DEFAULT 0,
+          enabled INTEGER DEFAULT 1
+        )
+      `),
+      // Service accounts table
+      env.DB.prepare(`
+        CREATE TABLE IF NOT EXISTS service_accounts (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          json_data TEXT NOT NULL,
+          enabled INTEGER DEFAULT 1
+        )
+      `),
+      // Users table
+      env.DB.prepare(`
+        CREATE TABLE IF NOT EXISTS users (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          username TEXT NOT NULL UNIQUE,
+          password_hash TEXT NOT NULL,
+          role TEXT DEFAULT 'user',
+          enabled INTEGER DEFAULT 1
+        )
+      `),
+      // Sessions table
+      env.DB.prepare(`
+        CREATE TABLE IF NOT EXISTS sessions (
+          token TEXT PRIMARY KEY,
+          username TEXT NOT NULL,
+          expires_at TEXT NOT NULL
+        )
+      `)
+    ];
 
-      -- Drives table
-      CREATE TABLE IF NOT EXISTS drives (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        drive_id TEXT NOT NULL UNIQUE,
-        name TEXT NOT NULL,
-        order_index INTEGER DEFAULT 0,
-        protect_file_link INTEGER DEFAULT 0,
-        enabled INTEGER DEFAULT 1
-      );
-
-      -- Service accounts table
-      CREATE TABLE IF NOT EXISTS service_accounts (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        json_data TEXT NOT NULL,
-        enabled INTEGER DEFAULT 1
-      );
-
-      -- Users table (for login system)
-      CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT NOT NULL UNIQUE,
-        password_hash TEXT NOT NULL,
-        role TEXT DEFAULT 'user',
-        enabled INTEGER DEFAULT 1
-      );
-
-      -- Sessions table
-      CREATE TABLE IF NOT EXISTS sessions (
-        token TEXT PRIMARY KEY,
-        username TEXT NOT NULL,
-        expires_at TEXT NOT NULL
-      );
-    `);
-
+    await env.DB.batch(statements);
     return jsonResponse({ success: true });
   } catch (error) {
     return jsonResponse({ success: false, error: (error as Error).message }, 500);
