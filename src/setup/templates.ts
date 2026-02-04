@@ -140,11 +140,11 @@ function getStepContent(step: number): string {
 <div class="mb-3"><label class="form-label">Site Name</label>
 <input type="text" class="form-control" id="site_name" value="Google Drive Index"></div>
 
-<div class="mb-3"><label class="form-label">Admin Username</label>
+<div class="mb-3"><label class="form-label">Admin Username <span class="text-danger">*</span></label>
 <input type="text" class="form-control" id="admin_username" value="admin"></div>
 
-<div class="mb-3"><label class="form-label">Admin Password</label>
-<input type="password" class="form-control" id="admin_password" placeholder="Set admin password"></div>
+<div class="mb-3"><label class="form-label">Admin Password <span class="text-danger">*</span></label>
+<input type="password" class="form-control" id="admin_password" placeholder="Required (min 4 chars)" required></div>
 </div>
 
 <div class="col-md-6">

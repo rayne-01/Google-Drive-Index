@@ -249,6 +249,14 @@ async function handleSaveDrives(body: any, env: Env): Promise<Response> {
  */
 async function handleSaveSettings(body: any, env: Env): Promise<Response> {
   try {
+    // Require admin username and password
+    if (!body.admin_username || !body.admin_username.trim()) {
+      return jsonResponse({ success: false, error: 'Admin username is required' }, 400);
+    }
+    if (!body.admin_password || body.admin_password.length < 4) {
+      return jsonResponse({ success: false, error: 'Admin password is required (min 4 characters)' }, 400);
+    }
+
     const settings: [string, string][] = [
       ['site.name', body.site_name || 'Google Drive Index'],
       ['site.download_mode', body.download_mode || 'path'],
@@ -257,8 +265,8 @@ async function handleSaveSettings(body: any, env: Env): Promise<Response> {
       ['auth.redirect_domain', body.redirect_domain || ''],
       ['security.blocked_regions', body.blocked_regions || ''],
       ['security.blocked_asn', body.blocked_asn || ''],
-      ['admin.username', body.admin_username || 'admin'],
-      ['admin.password', body.admin_password || ''],
+      ['admin.username', body.admin_username.trim()],
+      ['admin.password', body.admin_password],
     ];
 
     for (const [key, value] of settings) {
