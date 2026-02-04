@@ -8,7 +8,7 @@
 
 **Modern, TypeScript-based Google Drive Index on Cloudflare Workers**
 
-[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/yourusername/google-drive-index)
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/CloudflareHackers/Google-Drive-Index)
 
 [Features](#-features) • [Quick Start](#-quick-start) • [Deploy](#-deployment-options) • [Docs](#-documentation)
 
