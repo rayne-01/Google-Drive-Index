@@ -344,10 +344,11 @@ export interface Env {
   FILES_LIST_PAGE_SIZE?: string;
   SEARCH_PAGE_SIZE?: string;
 
-  // Secrets (masked in dashboard, set via `wrangler secret put`)
+  // Credentials
   CLIENT_ID?: string;
   CLIENT_SECRET?: string;
   REFRESH_TOKEN?: string;
+  SERVICE_ACCOUNT_JSON?: string;
   GOOGLE_CLIENT_ID_FOR_LOGIN?: string;
   GOOGLE_CLIENT_SECRET_FOR_LOGIN?: string;
   CRYPTO_BASE_KEY?: string;

@@ -30,10 +30,14 @@ command = "npm install && npx wrangler deploy"
 [vars]
 ENVIRONMENT = "production"
 
-# Google OAuth2 Credentials
+# Google OAuth2 Credentials (Option 1: User Account)
 CLIENT_ID = ""
 CLIENT_SECRET = ""
 REFRESH_TOKEN = ""
+
+# Service Account (Option 2: paste JSON as single line, or leave empty)
+# Get from Google Cloud Console > IAM > Service Accounts > Keys > Create Key (JSON)
+SERVICE_ACCOUNT_JSON = ""
 
 # Site Settings
 SITE_NAME = "Google Drive Index"

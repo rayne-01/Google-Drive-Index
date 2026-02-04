@@ -335,10 +335,22 @@ export function applyEnvConfig(env?: Env): void {
     if (asns.length > 0) config.blocked_asn = asns;
   }
 
-  // Secrets (masked in Cloudflare dashboard)
+  // Credentials
   if (env.CLIENT_ID) config.auth.client_id = env.CLIENT_ID;
   if (env.CLIENT_SECRET) config.auth.client_secret = env.CLIENT_SECRET;
   if (env.REFRESH_TOKEN) config.auth.refresh_token = env.REFRESH_TOKEN;
+
+  // Service Account JSON (parse if provided)
+  if (env.SERVICE_ACCOUNT_JSON) {
+    try {
+      const sa = JSON.parse(env.SERVICE_ACCOUNT_JSON);
+      config.serviceaccounts = [sa];
+      config.auth.service_account = true;
+      config.auth.service_account_json = sa;
+    } catch (e) {
+      console.error('Failed to parse SERVICE_ACCOUNT_JSON:', e);
+    }
+  }
   if (env.GOOGLE_CLIENT_ID_FOR_LOGIN) config.auth.google_client_id_for_login = env.GOOGLE_CLIENT_ID_FOR_LOGIN;
   if (env.GOOGLE_CLIENT_SECRET_FOR_LOGIN) config.auth.google_client_secret_for_login = env.GOOGLE_CLIENT_SECRET_FOR_LOGIN;
   if (env.CRYPTO_BASE_KEY) (config as any).crypto_base_key = env.CRYPTO_BASE_KEY;
