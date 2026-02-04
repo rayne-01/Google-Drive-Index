@@ -1,9 +1,9 @@
 {
   "name": "@googledrive/index",
-  "version": "2.3.7",
+  "version": "3.0.0",
   "description": "Google Drive Index - A serverless Google Drive directory listing on Cloudflare Workers",
   "private": false,
-  "main": "src/worker.js",
+  "main": "src/index.ts",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
@@ -38,7 +38,7 @@
     "node": ">=18.0.0"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20241218.0",
+    "@cloudflare/workers-types": "^4.20260203.0",
     "eslint": "^8.57.0",
     "prettier": "^3.4.2",
     "typescript": "^5.7.2",

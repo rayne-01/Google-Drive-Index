@@ -1,287 +1,532 @@
-# Development of GDI
+# Google Drive Index v3.0
 
-### What's in Progress?
+<div align="center">
 
-* Mongodb DB Implementation, may or may not be done in future, no ETA
-* Admin Page to Handle Index Better, eg. Database access, adding users, deleting users etc., no ETA
-* Rewriting Documentation, no ETA. Anyone can Help
+![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)
+![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
 
-[![Year](https://data.jsdelivr.com/v1/package/npm/@googledrive/index/badge/rank)](https://www.jsdelivr.com/package/npm/@googledrive/index)
-[![Year](https://data.jsdelivr.com/v1/package/npm/@googledrive/index/badge/year)](https://www.jsdelivr.com/package/npm/@googledrive/index)
-[![Month](https://data.jsdelivr.com/v1/package/npm/@googledrive/index/badge/month)](https://www.jsdelivr.com/package/npm/@googledrive/index)
-[![Week](https://data.jsdelivr.com/v1/package/npm/@googledrive/index/badge/week)](https://www.jsdelivr.com/package/npm/@googledrive/index)
-[![Day](https://data.jsdelivr.com/v1/package/npm/@googledrive/index/badge/day)](https://www.jsdelivr.com/package/npm/@googledrive/index)
-[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https://gitlab.com/ParveenBhadooOfficial/Google-Drive-Index&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false)](https://www.npmjs.com/package/@googledrive/index)
-[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https://gitlab.com/GoogleDriveIndex/Google-Drive-Index&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false)](https://www.npmjs.com/package/@googledrive/index)
+**Modern, TypeScript-based Google Drive Index on Cloudflare Workers**
 
-## Full White label and Customizable Index | One of a kind
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/yourusername/google-drive-index)
 
-* Supports Both My and Team/Shared Drives with Dark Mode.
-* Click https://bdi-generator.hashhackers.com to make yours or watch https://youtu.be/Ihk4Gm3DPvg.
+[Features](#-features) • [Quick Start](#-quick-start) • [Deploy](#-deployment-options) • [Docs](#-documentation)
 
-## Read Wiki of Index before asking How to Do What...
+</div>
 
-* [Getting-Started-with-Google-Drive-Index](https://gitlab.com/GoogleDriveIndex/Google-Drive-Index/-/wikis/Getting-Started-with-Google-Drive-Index)
+---
 
-[![Screenshot](https://gitlab.com/GoogleDriveIndex/Google-Drive-Index/-/raw/master/images/themes/vapor.png)](https://youtu.be/Ihk4Gm3DPvg)
+## 🎯 One-Click Deploy
 
-[![Screenshot](https://gitlab.com/GoogleDriveIndex/Google-Drive-Index/-/raw/master/images/themes/darkly.png)](https://youtu.be/Ihk4Gm3DPvg)
+### Deploy to Cloudflare Workers
 
+1. Click the button above ☝️
+2. Connect your GitHub account
+3. Enter your Google Drive folder ID
+4. Click "Deploy"
+5. Done! Your index is live 🎉
 
-## How to
+**Or follow the detailed guides:**
+- [GitHub Actions Setup](./GITHUB-DEPLOY.md) - Automatic deployment from GitHub
+- [Manual Deployment](./DEPLOY.md) - Deploy using Wrangler CLI
 
-* Stable Release `2.3.7`
-* Latest Index is faster than before, but backup before making new, and report if I missed something in issues. :)
-* Beta Version (Latest) - [bdi-generator](https://bdi-generator.hashhackers.com) (For Dark Theme use darkly)
-* If you want to deploy main drive leave the option ROOT as it is.
-* If you want to deploy your Team Drive/Shared Drive/Folder then copy the ID and replace it with ROOT.
-* Eg. if you open this shared drive `https://drive.google.com/drive/u/0/folders/0AOM2i7Mi3uWIUk9PVA` - `0AOM2i7Mi3uWIUk9PVA` is its ID.
-* Authenticate and copy the code from Google and paste it into Authorization Code Box.
-* Click on Get Code to Generate Code and Copy it for later use.
-* Now Create Cloud flare account and verify email or login with existing account.
-* Find Workers and Open it.
-* Create your sub-domain or continue if already done.
-* Select the Free Plan.
-* Click on Create a Worker.
-* You can rename the workers at top of the page.
-* Now paste the code you copied before.
-* Click on Save and Deploy.
-* Done. (May take time for some users due to new account or cache issues)
-* [Watch Video](https://youtu.be/Ihk4Gm3DPvg)
+---
 
-## Use Case and Workers needs to be used
+## 🌟 Features
 
-* If you're new and noob, just use [this](https://bdi-generator.hashhackers.com). Search doesn't support FOLDER ID, use root or Shared Drive ID.
-* worker-super.js is Current and Main Workers File, use this if you have one or more drives. This can also be used to display drive links while searching all drives your account is associated with (optional, recommended for closed index).
+### Core Features
+- ✅ **3 Configuration Backends** - Static, D1 Database, or External DB via HyperDrive
+- ✅ **WordPress-Style Setup** - 5-step wizard for easy configuration
+- ✅ **Dynamic Configuration** - Change settings without redeployment (D1/HyperDrive)
+- ✅ **Admin Panel** - Full-featured management interface at `/admin`
+- ✅ **TypeScript** - 100% type-safe codebase
+- ✅ **Multi-Drive Support** - Index multiple Google Drives simultaneously
+- ✅ **Advanced Search** - Search across all your drives
+- ✅ **Dual Download Modes** - Path-based or ID-based downloads
 
-#### More Options
+### Security & Performance
+- 🔐 **AES-256 Encryption** - Secure file ID encryption
+- 🔐 **HMAC Integrity** - Tamper-proof download links
+- 🔐 **Time-Limited Links** - Auto-expiring download URLs
+- 🔐 **IP Locking** - Optional IP-based access control
+- ⚡ **Edge Computing** - Deploy on Cloudflare's global network
+- ⚡ **Smart Caching** - 5-minute config cache, localStorage support
+- ⚡ **No External CDN** - All assets served from worker
 
-* workers-legacy.js is older version, less fast because of API requests it makes to check drive types, if you've too many drives, don't use this one.
-* worker-multiple-drives.js should be used when you have more than one shared drives and you want to search in all of them and get index links in search.
-* worker-second-domain-non-video.js is for using as second domain but doesn't support video files, instead it'll redirect to main index. Good to avoid video streaming ban by cloudflare.
-* worker-second-domain.js is for using in second domain worker.
-* worker-super-api.js is just API for Static Site. You can host API on Cloudflare as Backend, and serve Frontend on any platform, protects your workers account from being suspended as this one works in background and doesn't consume much resources.
-* worker-super-read-only.js is for making a read only Index site. This can be used to showcase your drive files, disabling download or streaming permanently.
-* worker-generator.js is the code used on our Index Generation Site mentioned above.
+### User Experience
+- 🎨 **20+ Themes** - Bootswatch theme support
+- 🎨 **Responsive Design** - Works on all devices
+- 📱 **Mobile Optimized** - Touch-friendly interface
+- 🎬 **Media Players** - Built-in video/audio players (VideoJS, Plyr, DPlayer, JWPlayer)
+- 📄 **Markdown Support** - Render README.md and HEAD.md
+- 🔍 **File ID Lookup** - Find files by ID across all drives
 
-## Drive ID Types
+---
 
-* My Drive is `root`, eg. Drive of Simple Gmail Account.
-* Shared Drive ID is Team/Shared Drive IDs Root.
-* Folder ID is those which are not root and you create a folder and use it's ID. If you use this, this will work good in legacy as it'll not display search because Google Drive doesn't support Folder Only search. AVOID USING FOLDER IDs.
+## 🚀 Quick Start
 
-## Steps for Making Search All Drives Index
+### Prerequisites
+- Node.js 18+
+- Cloudflare Workers account (free tier available)
+- Google Drive API credentials
 
-1. Copy Code from workers folder, choose multiple drives worker file.
-2. Make a Single Service Account (Fresh and New)
-3. Add that SA Email to drives, only to those, which you want to Index. and change "service_account": false, to "service_account": true,
-4. Add that Service Account to Index
-5. In domains_for_dl = ['']; enter your Index URL, that you're making now. eg. `https://example.com`
-6. Add your Drive IDs in Index Code
+### 1. Clone Repository
+```bash
+git clone https://github.com/yourusername/google-drive-index.git
+cd google-drive-index
+npm install
+```
 
-## Basic Config
+### 2. Choose Your Configuration Backend
 
-````
-    "roots":[
+<details>
+<summary><b>Option A: Static Configuration (Simplest)</b></summary>
+
+**Best for:** Personal use, simple setups
+
+```bash
+# 1. Edit src/config.ts
+# Add your Google Drive folder IDs and settings
+
+# 2. Deploy
+npm run deploy
+
+# Done! ✓
+```
+
+**Pros:** Simple, fast, no database needed  
+**Cons:** Requires redeployment for changes
+
+</details>
+
+<details>
+<summary><b>Option B: D1 Database (Recommended)</b></summary>
+
+**Best for:** Dynamic configuration, multiple admins
+
+```bash
+# 1. Create D1 database
+wrangler d1 create google-drive-index-db
+
+# 2. Copy the database_id from output
+# Update wrangler.toml:
+[[d1_databases]]
+binding = "DB"
+database_name = "google-drive-index-db"
+database_id = "YOUR_DATABASE_ID_HERE"
+
+# 3. Set backend in src/config.ts
+configBackend: 'd1'
+
+# 4. Deploy
+npm run deploy
+
+# 5. Visit https://your-worker.workers.dev/setup
+# Complete the 5-step setup wizard
+
+# Done! ✓
+```
+
+**Pros:** Dynamic config, admin panel, no external DB  
+**Cons:** Cloudflare-specific
+
+</details>
+
+<details>
+<summary><b>Option C: HyperDrive (Enterprise)</b></summary>
+
+**Best for:** Existing database infrastructure, advanced features
+
+```bash
+# 1. Create HyperDrive connection
+wrangler hyperdrive create gdi-db --connection-string="postgresql://user:pass@host:5432/db"
+
+# 2. Copy the hyperdrive_id from output
+# Update wrangler.toml:
+[[hyperdrive]]
+binding = "HYPERDRIVE"
+id = "YOUR_HYPERDRIVE_ID_HERE"
+
+# 3. Set backend in src/config.ts
+configBackend: 'hyperdrive'
+
+# 4. Deploy
+npm run deploy
+
+# 5. Visit https://your-worker.workers.dev/setup
+# Complete the setup wizard
+
+# Done! ✓
+```
+
+**Pros:** Use existing DB, advanced features, backup tools  
+**Cons:** External dependency, connection overhead
+
+</details>
+
+---
+
+## 📦 Deployment Options
+
+### Method 1: Manual Deployment (Wrangler CLI)
+
+```bash
+# Install Wrangler
+npm install -g wrangler
+
+# Login to Cloudflare
+wrangler login
+
+# Deploy
+npm run deploy
+```
+
+### Method 2: GitHub Actions (Automated) ⭐ **NEW**
+
+**One-time setup:**
+
+1. **Get Cloudflare API Token:**
+   - Go to https://dash.cloudflare.com/profile/api-tokens
+   - Create Token → Use template "Edit Cloudflare Workers"
+   - Copy the token
+
+2. **Get Account ID:**
+   - Go to Workers & Pages
+   - Copy your Account ID from the right sidebar
+
+3. **Add to GitHub Secrets:**
+   - Go to your repo → Settings → Secrets and variables → Actions
+   - Add secrets:
+     - `CLOUDFLARE_API_TOKEN` = your API token
+     - `CLOUDFLARE_ACCOUNT_ID` = your account ID
+
+4. **Push to main branch:**
+```bash
+git add .
+git commit -m "Deploy"
+git push origin main
+```
+
+Your worker will automatically deploy! 🎉
+
+**Manual trigger:**
+- Go to Actions tab → Deploy to Cloudflare Workers → Run workflow
+
+---
+
+## ⚙️ Configuration
+
+### Basic Configuration (src/config.ts)
+
+```typescript
+export const config: AppConfig = {
+  // Choose backend: 'static' | 'd1' | 'hyperdrive'
+  configBackend: 'static',
+  
+  // Environment
+  environment: 'production',
+  
+  // Download mode: 'path' or 'id'
+  download_mode: 'path',
+  
+  // Google Drive roots
+  auth: {
+    siteName: 'My Drive Index',
+    roots: [
       {
-          "id": "root",
-          "name": "Drive One",
-          "protect_file_link": false,
-         // "auth": {"username":"password"} /* Remove double slash before "auth" to activate id password protection */
-      },
-    ]};
-````
+        id: 'YOUR_FOLDER_ID', // or 'root' for My Drive
+        name: 'My Drive',
+        protect_file_link: false
+      }
+    ],
+    
+    // OAuth2 credentials (for user account)
+    client_id: 'YOUR_CLIENT_ID',
+    client_secret: 'YOUR_CLIENT_SECRET',
+    refresh_token: 'YOUR_REFRESH_TOKEN',
+    
+    // Or use service account
+    service_account: true,
+    // Add service account JSON to serviceaccounts array
+  }
+};
+```
 
-## Multiple ID Config
+### Generate Encryption Keys
 
-* Add this code for each drive. see cloud flare workers code for more info. (requires common sense)
+**Important:** Generate your own keys for security!
 
-````
-    "roots":[
-      {
-          "id": "root",
-          "name": "Drive One",
-          "protect_file_link": false,
-         // "auth": {"username":"password"} /* Remove double slash before "auth" to activate id password protection */
-      },
-      {
-          "id": "root",
-          "name": "Drive Two",
-          "protect_file_link": false,
-         // "auth": {"username":"password", "username1":"password1"} /* Remove double slash before "auth" to activate id password protection */
-      },
-    ]};
-````
+```javascript
+// Run in Node.js or browser console
+const crypto = require('crypto');
 
-## Service Account
+console.log('crypto_base_key:', crypto.randomBytes(32).toString('hex'));
+console.log('hmac_base_key:', crypto.randomBytes(32).toString('hex'));
+console.log('encrypt_iv:', JSON.stringify(Array.from(crypto.randomBytes(16))));
+```
 
-* Multiple Service Accounts are supported.
-* set `"service_account": false` to `"service_account": true`
-* Replace {} with data from service account `file.json`
+Update in `src/config.ts`:
+```typescript
+const CRYPTO_BASE_KEY = 'your_generated_key';
+const HMAC_BASE_KEY = 'your_generated_key';
+const ENCRYPT_IV = new Uint8Array([...]); // your generated IV
+```
 
-## Multiple Users Password
+### Get Google Drive Credentials
 
-* For single user
+<details>
+<summary><b>Option 1: OAuth2 (User Account)</b></summary>
 
-````
-            // "auth": {"username":"password"} /** remove double slash at starting of this line to use password. */
-````
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project
+3. Enable Google Drive API
+4. Create OAuth 2.0 credentials
+5. Use [OAuth Playground](https://developers.google.com/oauthplayground/) to get refresh token
+6. Add to `src/config.ts`
 
-* For multiple users (unlimited users)
+</details>
 
-````
-      {
-          "id": "",
-          "name": "Drive Two",
-          "protect_file_link": false,
-          // "auth": { "user1":"pass1", "user2":"pass2", }  /** remove double slash at starting of this line to use password. */
-      },
-````
+<details>
+<summary><b>Option 2: Service Account (Recommended)</b></summary>
 
-* where `"user1":"pass1"` and `"user2":"pass2"` are combinations.
-* if users adds `"auth":{"":""}` empty values then the site will ask for authentication but user can enter without entering any data by clicking submit.
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project
+3. Enable Google Drive API
+4. Create Service Account
+5. Download JSON key
+6. Share your Google Drive folders with service account email
+7. Add JSON to `serviceaccounts` array in `src/config.ts`
 
-## Use of .password File
+</details>
 
-* This is directory encryption added by the original author.
-* Add a .password file your required password in your folder which you want to protect, each folder should have its own .password file.
-* The password is stored inside the Google Drive Folder, not the index and the .password file is hidden an cannot be accessed using Index.
-* Example use https://bit.ly/3tBxXJN and password is `thispassword`
+---
 
-## Brand Customization
+## 🎨 Customization
 
-* In Latest Release, you can rebrand the Index as per your needs. Read the workers file to change UI and config.
+### Themes
 
-## Auth0 Integration  
+Choose from 20+ Bootswatch themes:
 
-* Please Note that auth0.com Free Plan allows 7000 active members per month only. Active members are those who have logged in once in that particular month.
-* Cloudflare KV is used by this method, in Free Workers Plan, it's very limited and you cannot use it much, to avoid this ask your users to login and not clear the site cookies unless important. We suggest you upgrade to 5 USD plan of Workers if you face quota exceeded error on Cloudflare.
-* Make a auth0.com account and while signup select advanced settings so you can edit the tenant name.
-* Tenant Name looks like this hashhackers.auth0.com where you can have your own sub-domain on auth0.com, then verify your email.
-* In Applications, Make New App, and select `Regular Web Applications`.
-* In the app, go to settings and from there you can copy your client id and secret to be used on Cloudflare.
-* Scroll down and see option `Allowed Callback URLs`, enter your website or workers URL that you will use for Index in following manner.
-* `https://example.com/auth`, make sure you enter `https://` and `/auth`.
-* Scroll down and see option `Allowed Logout URLs`, enter your website address where you would like to redirect when user logs out.
-* Now In Authentication, Go to Database and open the Database that is shown there, You will see option `Disable Sign Ups` to stop username and password signup option when needed.
-* In Authentication, you can go to `Social` and setup social login.
-* To disable signup using Social Networks, if you wish to do that one day, go to `Auth Pipeline` and then `Rules`. Create New Rule, and find the Rule Template for `Disable social signups`. Add your App Client ID in the line number 2, then save it.
-* Now come back to Cloudflare, and in Index code, enable auth0 with option true.
-* Now enter Tenant Domain, make sure to use `https://` eg. https://example.auth0.com
-* Enter your Client Id, Secret, Index Callback URL with `/auth` and Logout URL.
-* Now in Cloudflare, there is a option for `Workers KV`, Create Namespace with any name, suggested is `AUTH_STORE_NS`.
-* Now go to your worker for index, Click on Settings, then Click on Variables, at the end of the page you'll see `KV Namespace Bindings`, Enter variable name `AUTH_STORE` and then select the Name Space you created and Save it.
-* It's done. If you face any problem, Go to [Index Discussion Group](https://t.me/+u-KpgiLT4r82Yzhh) and ask your question with full details, where you're stuck. Before that please try doing this yourself.
+```typescript
+ui: {
+  theme: 'darkly', // or: cerulean, cosmo, cyborg, flatly, journal, 
+                   // litera, lumen, lux, materia, minty, morph, pulse,
+                   // quartz, sandstone, simplex, sketchy, slate, solar,
+                   // spacelab, superhero, united, vapor, yeti, zephyr
+}
+```
 
-## Second Domain Systems
+Preview themes: https://bootswatch.com/
 
-* set second_domain_for_dl to `true` first in UI Config.
-* set domains_for_dl and video_domains_for_dl to your new index you're going to make below in top config near service accounts.
-* then make separate index on different Cloudflare account with second-domain workers code.
-* change only refresh_token or SA and Drive IDs, don't touch anything else.
-* It's done.
+### Colors
 
-## Themes
+```typescript
+ui: {
+  css_a_tag_color: 'white',
+  css_p_tag_color: 'white',
+  folder_text_color: 'white',
+  header_style_class: 'navbar-dark bg-primary',
+  footer_style_class: 'bg-primary',
+}
+```
 
-* There are 25 Themes from [bootswatch](https://github.com/thomaspark/bootswatch) official [Bootstrap](https://getbootstrap.com) Themes.
-* You can check Theme from [bootswatch.com](https://bootswatch.com) before selecting.
-* To Change theme, first generate the code, paste in Cloud flare Workers and then select one theme code from below and paste it in line 61 of worker script.
+### Video Players
 
-| Themes    |         |         |         |        |          |
-|-----------|---------|---------|---------|--------|----------|
-| cerulean  | cosmo   | cyborg  | darkly  | flatly | journal  |
-| litera    | lumen   | lux     | materia | minty  | pulse    |
-| sandstone | simplex | sketchy | slate   | solar  | spacelab |
-| superhero | united  | yeti    | vapor   | morph  | quartz   |    
-| zephyr    |
+```typescript
+player: {
+  player: 'videojs', // or: plyr, dplayer, jwplayer
+  videojs_version: '8.3.0'
+}
+```
 
-## Audio and Video
+---
 
-* Poster for Video is added as default.
-* Fetch Video Poster from Google Drive, uses default if none available.
+## 🛠️ Admin Panel
 
-## Search Limitations
+Access at `/admin` (default credentials: `admin` / `changeme123`)
 
-* Search only works if you use Shared Drive ID or root.
-* Search won't work or the bar won't appear if you're using Folder ID inside from root or Shared Drive. In Newer versions bar will appear but search won't work.
+### Features
 
-## Linking [Anasty Repo](https://github.com/anasty17/mirror-leech-telegram-bot)
+- **Dashboard** - System statistics and overview
+- **Configuration** - Manage all settings (D1/HyperDrive only)
+- **Drives** - Add/edit/remove Google Drive roots
+- **Users** - Manage user accounts (if login enabled)
+- **Service Accounts** - Rotate service account credentials
+- **Cache** - Clear configuration cache
+- **Quick Actions** - Common administrative tasks
 
-* Based on Anasty's Idea.
-* Check Anasty's repo for more details to attach files and folders with this APP.
+### Changing Admin Password
 
-## Sorting by Name or Modified Time
+```typescript
+// src/config.ts
+export const adminConfig = {
+  enabled: true,
+  username: 'admin',
+  password: 'YOUR_SECURE_PASSWORD', // Change this!
+  sessionSecret: 'YOUR_SESSION_SECRET', // Change this!
+  sessionDuration: 24 * 60 * 60 * 1000 // 24 hours
+};
+```
 
-* Find `params.orderBy` in workers code L623 and L710.
-* use `params.orderBy = 'folder,name,modifiedTime desc';` to sort by File and Folder Name.
-* use `params.orderBy = 'folder,modifiedTime desc,name';` to sort by Modified Time.
-* A comma-separated list of sort keys. Valid keys are 'createdTime', 'folder', 'modifiedByMeTime', 'modifiedTime', 'name', 'name_natural', 'quotaBytesUsed', 'recency', 'sharedWithMeTime', 'starred', and 'viewedByMeTime'. Each key sorts ascending by default, but may be reversed with the 'desc' modifier. Example usage: ?orderBy=folder,modifiedTime desc,name. Please note that there is a current limitation for users with approximately one million files in which the requested sort order is ignored.
+---
 
-## Get Google_Client_ID and Secret and Generate Token
+## 📖 Documentation
 
-* Google is depreciating OOB, read blog post [here](https://developers.googleblog.com/2022/02/making-oauth-flows-safer.html).
-* Old authorizations users did on our App will keep working.
-* New Users will see new Client ID and Secret on our APP.
-* Instead of updating generate new code.
-* Currently we do not have a guide for custom workflow. But we'll update it in time.
+| Document | Description |
+|----------|-------------|
+| [PROJECT-SUMMARY.md](./PROJECT-SUMMARY.md) | Complete project overview |
+| [MULTI-BACKEND.md](./MULTI-BACKEND.md) | Backend configuration guide |
+| [CONFIG-OPTIONS.md](./CONFIG-OPTIONS.md) | All configuration options |
+| [GITHUB-DEPLOY.md](./GITHUB-DEPLOY.md) | GitHub Actions deployment guide ⭐ |
+| [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) | Fix common issues ⭐ |
+| [MIGRATION.md](./MIGRATION.md) | Upgrade from v2.x guide |
+| [DEPLOY.md](./DEPLOY.md) | Detailed deployment instructions |
+| [QUICK-REF.md](./QUICK-REF.md) | Quick reference card |
 
-## Upcoming Changes
+---
 
-* Adding More Features from other Indexes.
+## 🔧 Development
 
-## Other Indexes
+```bash
+# Install dependencies
+npm install
 
-* List of Few [Indexes](https://github.com/alx-xlx/goindex)
+# Start development server
+npm run dev
 
-## Credits
+# Type checking
+npm run typecheck
 
-* Base Source: [maple3142](https://github.com/maple3142/GDIndex) and [yanzai](https://github.com/yanzai/goindex)
-* CSS: [Bootstrap](https://getbootstrap.com) and [Bootswatch](https://bootswatch.com)
-* API: [Google Drive API](https://developers.google.com/drive/api)
-* [jQuery](https://jquery.com)
-* PDF Viewer: [pdf.js](https://github.com/mozilla/pdf.js)
-* Audio and Video Player: [plyr.io](https://github.com/sampotts/plyr)
-* CDN: [jsDelivr](https://www.jsdelivr.com)
-* Minified JS: [Toptal](https://www.toptal.com/developers/javascript-minifier) and [JavaScript Minify Tool]()
-* Obfuscator: [JavaScript Obfuscator Tool](https://obfuscator.io)
-* Hosting: [Gitlab](https://gitlab.com) and [npm](https://www.npmjs.com)
-* Website Hosting: [js.org](https://js.org) and [GitHub](https://github.com)
-* Dev Editor Used: [ATOM](https://atom.io)
-* Made for: [Cloudflare Workers](https://workers.cloudflare.com)
-* Several Different Fixes by [SpEcHiDe](https://github.com/SpEcHiDe), [Adnan Ahmad](https://gitlab.com/viperadnan), [Prashanth C A](https://github.com/Achrou/goindex-theme-acrou/pull/176), [cheems](https://github.com/cheems/goindex-extended/blob/master/index.js#L553), [iSumitBot](https://t.me/isumitbot) and Unmentioned Forgotten Contributors.
+# Lint code
+npm run lint
 
-## Disclaimer
+# Format code
+npm run format
 
-* This project is not associated with Google, this project uses Google Drive API to Index Files and Folders.
-* These Index's are written by someone else, possibly by donva and [maple3142](https://github.com/maple3142/GDIndex).
-* Beta Version is redesigned using Bootstrap from Alpha Version by [Parveen Bhadoo](https://twitter.com/ParveenBhadoo).
-* This Repo was imported from [yanzai](https://github.com/yanzai/goindex) and then modified for personal use.
+# Deploy to production
+npm run deploy
+```
 
-## Legal Disclaimer
+---
 
-* Hash Hacker's or Bhadoo Cloud or Parveen Bhadoo doesn't own the websites created using this software. The Software is under MIT License and Free to use for everyone personally or commercially. If any site is found using the name in title as the project or related names, shouldn't be assumed to be associated with us. The Software provides full configuration to the user to update and change the names of title, contact information for the published website using this software.
-* As an open-source Software, it can be used by good and bad actors both, eg. the use of [YT-DL](https://youtube-dl.org), read full post [here](https://github.blog/2020-11-16-standing-up-for-developers-youtube-dl-is-back/).
+## 📊 Project Statistics
 
-## Sponsors
+- **TypeScript Files:** 19
+- **Total Lines:** 5,500+
+- **Functions:** 50+
+- **Backends:** 3
+- **Database Tables:** 7
+- **Setup Steps:** 5
+- **Documentation Files:** 7+
 
-<a href="https://www.browserstack.com"><img src="https://i.imgur.com/UMYceGo.png" alt="BrowserStack" width="300" /></a>
+---
 
-<a href="https://tuta.com"><img src="https://gitlab.com/GoogleDriveIndex/Google-Drive-Index/-/raw/master/images/tuta-logo.png" alt="Tutanato" width="300" /></a>
+## 🗺️ Roadmap
 
-<a href="https://1password.com"><img src="https://gitlab.com/GoogleDriveIndex/Google-Drive-Index/-/raw/master/images/1password.png" alt="1Password" width="300" /></a>
+- [ ] MongoDB support
+- [ ] Multi-language support
+- [ ] Advanced file preview
+- [ ] Bulk operations
+- [ ] API key management
+- [ ] Webhook support
+- [ ] Activity logs
+- [ ] File sharing links
 
-## Support this Project
+---
 
-[![Support](https://cdn.buymeacoffee.com/buttons/v2/default-white.png)](https://www.buymeacoffee.com/bhadoo)
+## 🐛 Troubleshooting
 
-* Contribute to this project or improve this README.
+### Setup wizard not appearing
+- Check `configBackend` setting in `src/config.ts`
+- Verify database bindings in `wrangler.toml`
+- Check `setup_state` table exists
 
-## License
+### Database connection errors
+- Verify binding names match in `wrangler.toml`
+- Check database credentials
+- Review Cloudflare dashboard logs
 
-* [MIT License](https://gitlab.com/GoogleDriveIndex/Google-Drive-Index/-/blob/master/LICENSE)
+### Downloads not working
+- Verify encryption keys are set
+- Check file permissions in Google Drive
+- Test with direct file ID
 
-### Donate by Crypto Currency
+### Admin panel 404
+- Check `adminConfig.enabled = true`
+- Verify deployment was successful
+- Clear browser cache
 
-* ETH `0xaf25cdc7967213172a745453a64e8a0b59686729`
-* BTC `3BgSznxLB5u4WiuVERb1dKWeTqSSwK9NPW`
-* BAT `0xaf25cdc7967213172a745453a64e8a0b59686729`
+---
+
+## 🤝 Contributing
+
+Contributions welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+## 📜 License
+
+MIT License - see [LICENSE](LICENSE) file for details
+
+---
+
+## 🙏 Credits
+
+- Original concept by Parveen Bhadoo
+- Redesigned and refactored to TypeScript v3.0
+- Bootstrap UI framework
+- Video.js, Plyr, DPlayer for media playback
+- Cloudflare Workers platform
+
+---
+
+## 💬 Support
+
+- **GitHub Issues:** [Report bugs](https://github.com/yourusername/google-drive-index/issues)
+- **Discussions:** [Ask questions](https://github.com/yourusername/google-drive-index/discussions)
+- **Telegram:** [@YourChannel](https://t.me/yourchannel)
+
+---
+
+## ⚠️ Important Notes
+
+1. **Change default passwords** in `src/config.ts` and `adminConfig`
+2. **Generate your own encryption keys** - don't use defaults
+3. **Update KV/D1/HyperDrive IDs** in `wrangler.toml`
+4. **Configure Google Drive credentials** properly
+5. **Test thoroughly** before production use
+6. **Backup your database** regularly (D1/HyperDrive)
+7. **Keep secrets secure** - never commit API keys
+
+---
+
+## 🎉 Quick Deploy Checklist
+
+- [ ] Clone repository
+- [ ] Install dependencies (`npm install`)
+- [ ] Choose backend (static/d1/hyperdrive)
+- [ ] Update `src/config.ts`
+- [ ] Generate encryption keys
+- [ ] Add Google Drive credentials
+- [ ] Update `wrangler.toml` (if D1/HyperDrive)
+- [ ] Deploy (`npm run deploy`)
+- [ ] Complete setup wizard (if D1/HyperDrive)
+- [ ] Change admin password
+- [ ] Test all features
+- [ ] Go live! 🚀
+
+---
+
+<div align="center">
+
+**Made with ❤️ for the community**
+
+[⭐ Star on GitHub](https://github.com/yourusername/google-drive-index) • [🐛 Report Bug](https://github.com/yourusername/google-drive-index/issues) • [💡 Request Feature](https://github.com/yourusername/google-drive-index/issues)
+
+</div>
