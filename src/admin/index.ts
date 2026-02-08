@@ -11,9 +11,9 @@ import type { Env, AdminStats } from '../types';
 
 const ADMIN_SESSION_NAME = 'admin_session';
 
-async function generateAdminToken(): Promise<string> {
+async function generateAdminToken(username: string): Promise<string> {
   const expiry = Date.now() + adminConfig.sessionDuration;
-  const data = `${adminConfig.username}|${expiry}`;
+  const data = `${username}|${expiry}`;
   const hash = await generateIntegrity(data, adminConfig.sessionSecret);
   return `${await encryptString(data)}|${hash}`;
 }
@@ -22,11 +22,12 @@ async function verifyAdminToken(token: string): Promise<boolean> {
   try {
     const [encrypted, hash] = token.split('|');
     const data = await decryptString(encrypted);
-    const [username, expiry] = data.split('|');
+    const [_username, expiryStr] = data.split('|');
     
-    if (username !== adminConfig.username) return false;
-    if (parseInt(expiry) < Date.now()) return false;
+    // Check expiry
+    if (parseInt(expiryStr) < Date.now()) return false;
     
+    // Verify HMAC integrity (username is embedded in data, no need to match against config)
     return await verifyIntegrity(data, hash, adminConfig.sessionSecret);
   } catch {
     return false;
@@ -43,16 +44,40 @@ export async function isAdminAuthenticated(request: Request): Promise<boolean> {
   return verifyAdminToken(token);
 }
 
-export async function handleAdminLogin(request: Request): Promise<Response> {
+/**
+ * Get admin credentials - D1 first, then fallback to hardcoded config
+ */
+async function getAdminCredentials(env?: Env): Promise<{ username: string; password: string }> {
+  if (env?.DB) {
+    try {
+      const dbUsername = await env.DB.prepare(
+        "SELECT value FROM config WHERE key = 'admin.username' LIMIT 1"
+      ).first<{ value: string }>();
+      const dbPassword = await env.DB.prepare(
+        "SELECT value FROM config WHERE key = 'admin.password' LIMIT 1"
+      ).first<{ value: string }>();
+      
+      if (dbUsername?.value && dbPassword?.value) {
+        return { username: dbUsername.value, password: dbPassword.value };
+      }
+    } catch {
+      // D1 query failed, fall through to hardcoded
+    }
+  }
+  return { username: adminConfig.username, password: adminConfig.password };
+}
+
+export async function handleAdminLogin(request: Request, env?: Env): Promise<Response> {
   const formData = await request.formData();
   const username = formData.get('username') as string;
   const password = formData.get('password') as string;
 
-  if (username !== adminConfig.username || password !== adminConfig.password) {
+  const creds = await getAdminCredentials(env);
+  if (username !== creds.username || password !== creds.password) {
     return jsonResponse({ ok: false, error: 'Invalid credentials' }, 401);
   }
 
-  const token = await generateAdminToken();
+  const token = await generateAdminToken(username);
   return jsonResponse({ ok: true }, 200, {
     'Set-Cookie': buildCookie(ADMIN_SESSION_NAME, token, {
       path: '/admin',
@@ -163,7 +188,7 @@ export async function handleAdminRequest(request: Request, env?: Env): Promise<R
   }
 
   if (path === '/admin/login' && request.method === 'POST') {
-    return handleAdminLogin(request);
+    return handleAdminLogin(request, env);
   }
 
   if (path === '/admin/logout') {

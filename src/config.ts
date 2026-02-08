@@ -244,8 +244,8 @@ export const config: AppConfig = {
 export const adminConfig = {
   enabled: true,
   username: 'admin',
-  password: 'changeme123', // CHANGE THIS!
-  sessionSecret: 'your-session-secret-change-this', // CHANGE THIS!
+  password: 'changeme123', // Fallback only - D1 credentials take priority
+  sessionSecret: 'gdi-admin-session-secret-2026',
   sessionDuration: 24 * 60 * 60 * 1000 // 24 hours in milliseconds
 };
 
