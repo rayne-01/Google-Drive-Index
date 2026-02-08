@@ -276,9 +276,18 @@ export async function handleRequest(request: Request, env: Env): Promise<Respons
       
       if (!drive) return redirectResponse('/0:/');
 
-      // POST = API request for listing
+      // POST = API request (listing or file info)
       if (request.method === 'POST') {
-        return handleListRequest(request, drive, drivePath, userIp);
+        // Clone request to peek at body
+        const body = await request.json() as any;
+        
+        // If body has 'path' field, it's a file info request from file() function
+        if (body.path) {
+          return handleFileInfoRequest(drive, drivePath, userIp);
+        }
+        
+        // Otherwise it's a listing request
+        return handleListRequest(body, drive, drivePath, userIp);
       }
 
       // GET with ?a=view or trailing slash = render page
@@ -368,8 +377,31 @@ async function downloadFile(fileId: string, range: string, inline: boolean): Pro
   return new Response(response.body, { status: response.status, headers });
 }
 
-async function handleListRequest(request: Request, drive: GoogleDrive, path: string, userIp: string): Promise<Response> {
-  const body = await request.json() as ListRequestBody;
+/**
+ * Handle file info request (when client sends POST with {path: "..."})
+ * Returns file metadata with encrypted ID and download link
+ */
+async function handleFileInfoRequest(drive: GoogleDrive, drivePath: string, userIp: string): Promise<Response> {
+  const file = await drive.getSingleFile(drivePath);
+  if (!file) {
+    return jsonResponse({ error: 'File not found' }, 404);
+  }
+
+  const encryptedId = await encryptString(file.id);
+  const encryptedDriveId = file.driveId ? await encryptString(file.driveId) : '';
+  const link = file.mimeType !== 'application/vnd.google-apps.folder'
+    ? await generateDownloadLink(file.id, userIp)
+    : undefined;
+
+  return jsonResponse({
+    ...file,
+    id: encryptedId,
+    driveId: encryptedDriveId,
+    link
+  });
+}
+
+async function handleListRequest(body: ListRequestBody, drive: GoogleDrive, path: string, userIp: string): Promise<Response> {
   const result = await drive.listFiles(path, body.page_token || undefined, body.page_index || 0);
 
   // Encrypt file IDs and generate download links
