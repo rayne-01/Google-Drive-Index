@@ -522,7 +522,7 @@ async function loadCfg(){
           if(isBool)input='<select class="form-select form-select-sm ci" data-key="'+esc(c.key)+'"><option value="true"'+(c.value==='true'?' selected':'')+'>true</option><option value="false"'+(c.value!=='true'?' selected':'')+'>false</option></select>';
           else if(selOpts)input='<select class="form-select form-select-sm ci" data-key="'+esc(c.key)+'">'+selOpts.map(o=>'<option value="'+o+'"'+(c.value===o?' selected':'')+'>'+o+'</option>').join('')+'</select>';
           else input='<input type="text" class="form-control form-control-sm ci" data-key="'+esc(c.key)+'" value="'+esc(c.value)+'">';
-          return '<tr><td style="width:35%"><code>'+esc(c.key)+'</code></td><td>'+input+'</td><td style="width:50px"><button class="btn btn-sm btn-outline-danger" onclick="delCfg(\''+esc(c.key)+'\')"><i class="bi bi-trash"></i></button></td></tr>'
+          return '<tr><td style="width:35%"><code>'+esc(c.key)+'</code></td><td>'+input+'</td><td style="width:50px"><button class="btn btn-sm btn-outline-danger" onclick="delCfg(&apos;'+esc(c.key)+'&apos;)"><i class="bi bi-trash"></i></button></td></tr>'
         }).join('')+'</tbody></table></div></div>').join('')||'<div class="text-muted text-center py-4">No config keys.</div>';
   }catch(e){$('main').innerHTML='<div class="alert alert-danger">'+esc(e.message)+'</div>'}
 }
@@ -574,9 +574,9 @@ async function loadSec(){
       '<button class="btn btn-primary" onclick="saveBlk()"><i class="bi bi-save"></i> Save</button></div></div>'+
       '<div class="card"><div class="card-header"><h6 class="mb-0">Crypto Keys</h6></div><div class="card-body">'+
       '<div class="mb-3"><label class="form-label">Encryption Key '+(d['security.crypto_key_set']?'<span class="badge bg-success">Set</span>':'<span class="badge bg-danger">Not set</span>')+'</label><br>'+
-      '<button class="btn btn-outline-warning btn-sm" onclick="regenKey(\'crypto\')"><i class="bi bi-arrow-repeat"></i> Regenerate Crypto Key</button></div>'+
+      '<button class="btn btn-outline-warning btn-sm" onclick="regenKey(&apos;crypto&apos;)"><i class="bi bi-arrow-repeat"></i> Regenerate Crypto Key</button></div>'+
       '<div class="mb-3"><label class="form-label">HMAC Key '+(d['security.hmac_key_set']?'<span class="badge bg-success">Set</span>':'<span class="badge bg-danger">Not set</span>')+'</label><br>'+
-      '<button class="btn btn-outline-warning btn-sm" onclick="regenKey(\'hmac\')"><i class="bi bi-arrow-repeat"></i> Regenerate HMAC Key</button></div>'+
+      '<button class="btn btn-outline-warning btn-sm" onclick="regenKey(&apos;hmac&apos;)"><i class="bi bi-arrow-repeat"></i> Regenerate HMAC Key</button></div>'+
       '</div></div>';
   }catch(e){$('main').innerHTML='<div class="alert alert-danger">'+esc(e.message)+'</div>'}
 }
