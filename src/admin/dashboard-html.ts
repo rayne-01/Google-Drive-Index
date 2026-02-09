@@ -155,7 +155,7 @@ var h='<h4 class="mb-4"><i class="bi bi-google"></i> Google Login</h4>';
 h+='<div class="card mb-3"><div class="card-header"><h6 class="mb-0">Redirect URI for Cloud Console</h6></div>';
 h+='<div class="card-body"><div class="alert alert-info mb-0"><i class="bi bi-info-circle"></i> Add this <strong>Authorized redirect URI</strong> in Google Cloud Console:<br><br>';
 h+='<div class="input-group"><input type="text" class="form-control font-monospace" value="'+REDIRECT_URI+'" readonly id="ruri">';
-h+='<button class="btn btn-outline-secondary" onclick="navigator.clipboard.writeText(document.getElementById(\\\'ruri\\\').value);toast(\\\'Copied!\\\')"><i class="bi bi-clipboard"></i></button></div></div></div></div>';
+h+='<button class="btn btn-outline-secondary" onclick="navigator.clipboard.writeText(document.getElementById(&quot;ruri&quot;).value);toast(&quot;Copied!&quot;)"><i class="bi bi-clipboard"></i></button></div></div></div></div>';
 h+='<div class="card"><div class="card-header"><h6 class="mb-0">Google Login Settings</h6></div><div class="card-body">';
 h+='<p class="text-muted small">Credentials are never displayed once saved.</p>';
 h+='<div class="mb-3"><label class="form-label">Enable Google Login</label><select class="form-select" id="gl-en"><option value="true"'+(d['auth.enable_social_login']?' selected':'')+'>Enabled</option><option value="false"'+(!d['auth.enable_social_login']?' selected':'')+'>Disabled</option></select></div>';
