@@ -10,7 +10,7 @@ $('main').innerHTML='<h4 class="mb-4"><i class="bi bi-google"></i> Google Login<
 '<div class="card mb-3"><div class="card-header"><h6 class="mb-0">Redirect URI for Google Cloud Console</h6></div>'+
 '<div class="card-body"><div class="alert alert-info mb-0"><i class="bi bi-info-circle"></i> Add the following <strong>Authorized redirect URI</strong> in your Google Cloud Console OAuth 2.0 credentials:<br><br>'+
 '<div class="input-group"><input type="text" class="form-control font-monospace" value="'+REDIRECT_URI+'" readonly id="ruri">'+
-'<button class="btn btn-outline-secondary" onclick="navigator.clipboard.writeText(document.getElementById(\\'ruri\\').value);toast(\\'Copied!\\')"><i class="bi bi-clipboard"></i></button></div></div></div></div>'+
+'<button class="btn btn-outline-secondary" onclick="navigator.clipboard.writeText(document.getElementById(&apos;ruri&apos;).value);toast(&apos;Copied!&apos;)"><i class="bi bi-clipboard"></i></button></div></div></div></div>'+
 '<div class="card"><div class="card-header"><h6 class="mb-0">Google Login Settings</h6></div><div class="card-body">'+
 '<p class="text-muted small">Credentials are never displayed once saved.</p>'+
 '<div class="mb-3"><label class="form-label">Enable Google Login</label><select class="form-select" id="gl-en"><option value="true"'+(d['auth.enable_social_login']?' selected':'')+'>Enabled</option><option value="false"'+(!d['auth.enable_social_login']?' selected':'')+'>Disabled</option></select></div>'+
@@ -37,9 +37,9 @@ $('main').innerHTML='<h4 class="mb-4"><i class="bi bi-shield-check"></i> Securit
 '<button class="btn btn-primary" onclick="saveBlk()"><i class="bi bi-save"></i> Save</button></div></div>'+
 '<div class="card"><div class="card-header"><h6 class="mb-0">Crypto Keys</h6></div><div class="card-body">'+
 '<div class="mb-3"><label class="form-label">Encryption Key '+(d['security.crypto_key_set']?'<span class="badge bg-success">Set</span>':'<span class="badge bg-danger">Not set</span>')+'</label><br>'+
-'<button class="btn btn-outline-warning btn-sm" onclick="regenKey(\\'crypto\\')"><i class="bi bi-arrow-repeat"></i> Regenerate</button></div>'+
+'<button class="btn btn-outline-warning btn-sm" onclick="regenKey(&apos;crypto&apos;)"><i class="bi bi-arrow-repeat"></i> Regenerate</button></div>'+
 '<div class="mb-3"><label class="form-label">HMAC Key '+(d['security.hmac_key_set']?'<span class="badge bg-success">Set</span>':'<span class="badge bg-danger">Not set</span>')+'</label><br>'+
-'<button class="btn btn-outline-warning btn-sm" onclick="regenKey(\\'hmac\\')"><i class="bi bi-arrow-repeat"></i> Regenerate</button></div>'+
+'<button class="btn btn-outline-warning btn-sm" onclick="regenKey(&apos;hmac&apos;)"><i class="bi bi-arrow-repeat"></i> Regenerate</button></div>'+
 '</div></div>';
 }catch(e){$('main').innerHTML='<div class="alert alert-danger">'+esc(e.message)+'</div>'}}
 async function saveSec(){const b={};const u=$('su').value.trim();if(u)b.admin_username=u;const p=$('sp').value;if(p)b.admin_password=p;if(!Object.keys(b).length){toast('Nothing to save','warning');return}try{await api('security/save',b);toast('Saved!');loadSec()}catch(e){toast(e.message,'danger')}}

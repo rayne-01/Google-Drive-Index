@@ -178,8 +178,8 @@ h+='<div class="mb-3"><label class="form-label">Blocked Regions</label><input ty
 h+='<div class="mb-3"><label class="form-label">Blocked ASNs</label><input type="text" class="form-control" id="sa2" value="'+esc(d['security.blocked_asn'])+'" placeholder="12345, 67890"></div>';
 h+='<button class="btn btn-primary" onclick="saveBlk()"><i class="bi bi-save"></i> Save</button></div></div>';
 h+='<div class="card"><div class="card-header"><h6 class="mb-0">Crypto Keys</h6></div><div class="card-body">';
-h+='<p>Encryption Key: '+(d['security.crypto_key_set']?'<span class="badge bg-success">Set</span>':'<span class="badge bg-danger">Not set</span>')+' <button class="btn btn-outline-warning btn-sm ms-2" onclick="regenKey(\'crypto&apos;)">Regenerate</button></p>';
-h+='<p>HMAC Key: '+(d['security.hmac_key_set']?'<span class="badge bg-success">Set</span>':'<span class="badge bg-danger">Not set</span>')+' <button class="btn btn-outline-warning btn-sm ms-2" onclick="regenKey(\'hmac&apos;)">Regenerate</button></p>';
+h+='<p>Encryption Key: '+(d['security.crypto_key_set']?'<span class="badge bg-success">Set</span>':'<span class="badge bg-danger">Not set</span>')+' <button class="btn btn-outline-warning btn-sm ms-2" onclick="regenKey(&apos;crypto&apos;)">Regenerate</button></p>';
+h+='<p>HMAC Key: '+(d['security.hmac_key_set']?'<span class="badge bg-success">Set</span>':'<span class="badge bg-danger">Not set</span>')+' <button class="btn btn-outline-warning btn-sm ms-2" onclick="regenKey(&apos;hmac&apos;)">Regenerate</button></p>';
 h+='</div></div>';
 $('main').innerHTML=h;
 }catch(e){$('main').innerHTML='<div class="alert alert-danger">'+esc(e.message)+'</div>'}}
