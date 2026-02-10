@@ -1238,7 +1238,7 @@ async function fallback(id, type) {
                 const pdf = ["pdf"];
                 if (mimeType === "application/vnd.google-apps.folder") {
                     window.location.href = window.location.pathname + "/";
-                } else if (fileExtension) {
+                } else {
                     const name = obj.name;
                     const encoded_name = encodeURIComponent(name);
                     const size = formatFileSize(obj.size);
@@ -1313,7 +1313,7 @@ async function file(path) {
             const pdf = ["pdf"];
             if (mimeType === "application/vnd.google-apps.folder") {
                 window.location.href = window.location.pathname + "/";
-            } else if (fileExtension) {
+            } else {
                 const name = obj.name;
                 const encoded_name = encodeURIComponent(name);
                 const size = formatFileSize(obj.size);
