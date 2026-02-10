@@ -351,12 +351,15 @@ async function apiListSharedDrives(body: any, env: Env): Promise<Response> {
     });
     const data = await res.json() as any;
     if (data.error) return jsonResponse({ error: data.error.message || 'API error' }, 400);
-    // Also get the user's root drive
-    const rootRes = await fetch('https://www.googleapis.com/drive/v3/files/root?fields=id,name', {
-      headers: { Authorization: `Bearer ${token.access_token}` }
-    });
-    const rootData = await rootRes.json() as any;
-    const drives = [{ id: rootData.id, name: rootData.name || 'My Drive', type: 'personal' }];
+    const drives: Array<{id:string;name:string;type:string}> = [];
+    // Only get personal root for OAuth credentials, not service accounts
+    if (body.auth_type !== 'service_account') {
+      const rootRes = await fetch('https://www.googleapis.com/drive/v3/files/root?fields=id,name', {
+        headers: { Authorization: `Bearer ${token.access_token}` }
+      });
+      const rootData = await rootRes.json() as any;
+      if (rootData.id) drives.push({ id: rootData.id, name: rootData.name || 'My Drive', type: 'personal' });
+    }
     if (data.drives) {
       for (const d of data.drives) { drives.push({ id: d.id, name: d.name, type: 'shared' }); }
     }
