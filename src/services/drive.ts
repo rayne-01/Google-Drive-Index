@@ -132,11 +132,14 @@ export class GoogleDrive {
   async init(): Promise<void> {
     const cacheKey = this._driveConfig?._auth_type ? `drive_${this._driveConfig._client_id || this._driveConfig._sa_json?.client_email || 'default'}` : '_default';
     await getAccessTokenForDrive(cacheKey, this._driveConfig);
-    if (!config.auth.user_drive_real_root_id) {
-      const rootObj = await this.findItemById('root');
-      if (rootObj?.id) {
-        config.auth.user_drive_real_root_id = rootObj.id;
-      }
+    // Only resolve root for non-SA drives (SA doesn't have personal root)
+    if (!config.auth.user_drive_real_root_id && this._driveConfig?._auth_type !== 'service_account') {
+      try {
+        const rootObj = await this.findItemById('root');
+        if (rootObj?.id) {
+          config.auth.user_drive_real_root_id = rootObj.id;
+        }
+      } catch { /* SA or permission issue - skip */ }
     }
   }
 
