@@ -362,6 +362,13 @@ async function apiFetchRootId(body: any, env: Env): Promise<Response> {
       const data = await res.json() as any;
       return jsonResponse({ root_id: data.id, name: data.name || 'My Drive' });
     }
+    // Try as shared drive first
+    const sdRes = await fetch(`https://www.googleapis.com/drive/v3/drives/${driveId}?fields=id,name`, { headers: { Authorization: `Bearer ${token.access_token}` } });
+    const sdData = await sdRes.json() as any;
+    if (sdData.name) {
+      return jsonResponse({ root_id: sdData.id, name: sdData.name, type: 'shared_drive' });
+    }
+    // Fall back to file/folder lookup
     const res = await fetch(`https://www.googleapis.com/drive/v3/files/${driveId}?fields=id,name,mimeType&supportsAllDrives=true`, { headers: { Authorization: `Bearer ${token.access_token}` } });
     const data = await res.json() as any;
     if (data.error) return jsonResponse({ error: data.error.message || 'Drive API error' }, 400);
