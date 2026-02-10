@@ -367,6 +367,93 @@ async function apiListSharedDrives(body: any, env: Env): Promise<Response> {
   } catch (e) { return jsonResponse({ error: (e as Error).message }, 500); }
 }
 
+async function apiBulkAddDrives(body: any, env: Env): Promise<Response> {
+  try {
+    await ensureTables(env);
+    if (!body.credential_id) return jsonResponse({ error: 'credential_id required' }, 400);
+    const authType = body.auth_type || 'oauth';
+    const credentialId = +body.credential_id;
+
+    // Get access token
+    const token = await getAccessTokenForAdmin(credentialId, authType, env);
+    if ('error' in token) return jsonResponse({ error: token.error }, 400);
+
+    const drives: Array<{id:string;name:string;type:string}> = [];
+
+    // Get My Drive root (only for OAuth, not SA)
+    if (authType !== 'service_account') {
+      try {
+        const rootRes = await fetch('https://www.googleapis.com/drive/v3/files/root?fields=id,name', {
+          headers: { Authorization: `Bearer ${token.access_token}` }
+        });
+        const rootData = await rootRes.json() as any;
+        if (rootData.id) drives.push({ id: rootData.id, name: rootData.name || 'My Drive', type: 'personal' });
+      } catch { /* skip personal drive on error */ }
+    }
+
+    // Get all shared drives (paginate through all)
+    let pageToken: string | null = null;
+    do {
+      const url = 'https://www.googleapis.com/drive/v3/drives?pageSize=100&fields=nextPageToken,drives(id,name)' +
+        (pageToken ? '&pageToken=' + encodeURIComponent(pageToken) : '');
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${token.access_token}` } });
+      const data = await res.json() as any;
+      if (data.error) return jsonResponse({ error: data.error.message || 'API error fetching shared drives' }, 400);
+      if (data.drives) {
+        for (const d of data.drives) { drives.push({ id: d.id, name: d.name, type: 'shared' }); }
+      }
+      pageToken = data.nextPageToken || null;
+    } while (pageToken);
+
+    if (drives.length === 0) {
+      return jsonResponse({ error: 'No drives found for this credential' }, 400);
+    }
+
+    // Get existing drive IDs to avoid duplicates
+    const existing = await env.DB.prepare('SELECT drive_id FROM drives').all<{drive_id:string}>();
+    const existingIds = new Set((existing.results || []).map(r => r.drive_id));
+
+    // Get max order index
+    const maxOrder = await env.DB.prepare('SELECT MAX(order_index) as mx FROM drives').first<{mx:number}>();
+    let orderIdx = (maxOrder?.mx ?? -1) + 1;
+
+    let added = 0;
+    let skipped = 0;
+    const stmts: any[] = [];
+
+    for (const d of drives) {
+      if (existingIds.has(d.id)) {
+        skipped++;
+        continue;
+      }
+      stmts.push(
+        env.DB.prepare(
+          'INSERT INTO drives (drive_id, name, order_index, protect_file_link, enabled, auth_type, credential_id) VALUES (?, ?, ?, 0, 1, ?, ?)'
+        ).bind(d.id, d.name, orderIdx, authType, credentialId)
+      );
+      orderIdx++;
+      added++;
+    }
+
+    if (stmts.length > 0) {
+      // D1 batch has a limit, process in chunks of 50
+      for (let i = 0; i < stmts.length; i += 50) {
+        await env.DB.batch(stmts.slice(i, i + 50));
+      }
+    }
+
+    return jsonResponse({
+      ok: true,
+      added,
+      skipped,
+      total_found: drives.length,
+      message: `Added ${added} drive(s), skipped ${skipped} duplicate(s)`
+    });
+  } catch (e) {
+    return jsonResponse({ error: (e as Error).message }, 500);
+  }
+}
+
 async function apiFetchRootId(body: any, env: Env): Promise<Response> {
   try {
     if (!body.credential_id) return jsonResponse({ error: 'Please select a credential first' }, 400);
@@ -467,6 +554,7 @@ export async function handleAdminRequest(request: Request, env?: Env): Promise<R
       case '/admin/api/drives/delete': return apiDeleteDrive(body, env);
       case '/admin/api/drives/fetch-root': return apiFetchRootId(body, env);
       case '/admin/api/drives/list-shared': return apiListSharedDrives(body, env);
+      case '/admin/api/drives/bulk-add': return apiBulkAddDrives(body, env);
       case '/admin/api/config/set': return apiSetConfig(body, env);
       case '/admin/api/config/delete': return apiDeleteConfig(body, env);
       case '/admin/api/config/bulk': return apiBulkSetConfig(body, env);

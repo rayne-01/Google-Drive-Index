@@ -254,6 +254,9 @@ function render(path) {
         } else {
             return list(null, id, true);
         }
+    } else if (window.MODEL.is_global_search) {
+        // Global search across all drives - parallel requests
+        render_global_search_result_list();
     } else if (window.MODEL.is_search_page) {
         // Used to store the state of some scroll events
         window.scroll_status = {
@@ -324,10 +327,12 @@ function nav(path) {
   </li>${UI.show_logout_button ?'<li class="nav-item"><a class="nav-link" href="/logout">Logout</a></li>': ''}`;
 
     const search_text = model.is_search_page ? (model.q || '') : '';
+    const search_action = model.is_global_search ? '/search' : `/${cur}:search`;
+    const search_placeholder = model.is_global_search ? 'Search All Drives' : 'Search';
     const search_bar = `
 </ul>
-<form class="d-flex" method="get" action="/${cur}:search">
-<input class="form-control me-2" name="q" type="search" placeholder="Search" aria-label="Search" value="${search_text}" required>
+<form class="d-flex" method="get" action="${search_action}">
+<input class="form-control me-2" name="q" type="search" placeholder="${search_placeholder}" aria-label="Search" value="${search_text}" required>
 <button class="btn ${UI.search_button_class}" onclick="if($('#search_bar_form>input').val()) $('#search_bar_form').submit();" type="submit">Search</button>
 </form>
 </div>
@@ -929,6 +934,122 @@ function append_files_to_list(path, files) {
         } else {
             $('#count').removeClass('d-none').find('.totalsize').text(total_files + " Files with Size " + total_size);
         }
+    }
+}
+
+/**
+ * Global search across ALL drives in parallel (Promise.allSettled pattern)
+ * Results stream in progressively as each drive responds
+ */
+function render_global_search_result_list() {
+    const totalDrives = window.MODEL.total_drives || window.drive_names.length;
+    const q = window.MODEL.q;
+    if (!q) return;
+
+    const content = `
+  <div class="container"><br>
+  <div id="global-search-status"></div>
+  <div class="card">
+  <div class="${UI.path_nav_alert_class} d-flex align-items-center justify-content-between" role="alert" style="margin-bottom: 0;">
+    <span><i class="bi bi-search"></i> Search All Drives: <strong>${q}</strong></span>
+    <span id="gs-progress" class="badge bg-info">0 / ${totalDrives} drives</span>
+  </div>
+  <div id="list" class="list-group text-break">
+  </div>
+  </div>
+  <div class="${UI.file_count_alert_class} text-center d-none" role="alert" id="count"><span class="number text-center"></span> | <span class="totalsize text-center"></span></div>
+  </div>
+  `;
+    $('#content').html(content);
+    $('#list').html(`<div class="d-flex justify-content-center"><div class="spinner-border ${UI.loading_spinner_class} m-5" role="status" id="spinner"><span class="sr-only"></span></div></div>`);
+
+    let completedDrives = 0;
+    let totalFiles = 0;
+    let totalSize = 0;
+    let totalItems = 0;
+    let firstResult = true;
+
+    // Fire parallel search requests to all drives
+    const promises = [];
+    for (let i = 0; i < totalDrives; i++) {
+        const p = fetch(`/${i}:search`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ q: q, page_token: null, page_index: 0 })
+        })
+        .then(function(r) { return r.ok ? r.json() : null; })
+        .then(function(res) {
+            completedDrives++;
+            $('#gs-progress').text(completedDrives + ' / ' + totalDrives + ' drives');
+
+            if (firstResult) {
+                $('#spinner').remove();
+                firstResult = false;
+            }
+
+            if (res && res.data && res.data.files && res.data.files.length > 0) {
+                const driveName = window.drive_names[i] || ('Drive ' + i);
+                // Add drive header
+                $('#list').append('<div class="list-group-item list-group-item-action" style="background:rgba(0,0,0,0.1);font-weight:bold;"><i class="bi bi-hdd me-1"></i> ' + driveName + ' <span class="badge bg-secondary float-end">' + res.data.files.length + ' results</span></div>');
+
+                const files = res.data.files;
+                let html = '';
+                for (let j = 0; j < files.length; j++) {
+                    const item = files[j];
+                    totalItems++;
+                    if (item['size'] == undefined) item['size'] = '';
+                    item['modifiedTime'] = utc2delhi(item['modifiedTime']);
+
+                    if (item['mimeType'] == 'application/vnd.google-apps.folder') {
+                        html += '<a style="color: ' + UI.folder_text_color + ';" onclick="onSearchResultItemClick(\'' + item['id'] + '\', false)" data-bs-toggle="modal" data-bs-target="#SearchModel" class="countitems list-group-item list-group-item-action"> ' + folder_icon + ' ' + item.name + (UI.display_time ? ' <span class="badge bg-info float-end"> ' + item['modifiedTime'] + ' </span>' : '') + '</a>';
+                    } else {
+                        totalFiles++;
+                        totalSize += Number(item.size) || 0;
+                        item['size'] = formatFileSize(item['size']);
+                        const ext = item.fileExtension;
+                        const link = UI.second_domain_for_dl ? UI.downloaddomain + item.link : window.location.origin + item.link;
+                        html += '<div style="color: ' + UI.css_a_tag_color + ';" class="countitems size_items list-group-item list-group-item-action">';
+                        html += getFileIcon(ext);
+                        html += ' <span onclick="onSearchResultItemClick(\'' + item['id'] + '\', true)" data-bs-toggle="modal" data-bs-target="#SearchModel">' + item.name + '</span>';
+                        if (UI.display_download) {
+                            html += '<a href="' + link + '"><svg class="float-end" width="25px" style="margin-left: 8px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"></path><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"></path></svg></a>';
+                        }
+                        if (UI.display_size) html += '<span class="badge bg-primary float-end"> ' + item['size'] + ' </span>';
+                        if (UI.display_time) html += ' <span class="badge bg-info float-end"> ' + item['modifiedTime'] + ' </span>';
+                        html += '</div>';
+                    }
+                }
+                $('#list').append(html);
+            }
+
+            // Update counts
+            if (completedDrives === totalDrives) {
+                const total_size_str = formatFileSize(totalSize) || '0 Bytes';
+                if (totalItems == 0) {
+                    $('#count').removeClass('d-none').find('.number').text('No Results');
+                    $('#count').find('.totalsize').text('Found Nothing');
+                } else {
+                    $('#count').removeClass('d-none').find('.number').text(totalItems + ' items across ' + totalDrives + ' drives');
+                    $('#count').find('.totalsize').text(totalFiles + ' Files with Size ' + total_size_str);
+                }
+                $('#gs-progress').removeClass('bg-info').addClass('bg-success').text('Done');
+                if (firstResult) $('#spinner').remove();
+            }
+        })
+        .catch(function(err) {
+            completedDrives++;
+            $('#gs-progress').text(completedDrives + ' / ' + totalDrives + ' drives');
+            console.error('Search failed for drive ' + i, err);
+            if (completedDrives === totalDrives) {
+                if (totalItems == 0) {
+                    if (firstResult) $('#spinner').remove();
+                    $('#count').removeClass('d-none').find('.number').text('No Results');
+                    $('#count').find('.totalsize').text('Found Nothing');
+                }
+                $('#gs-progress').removeClass('bg-info').addClass('bg-success').text('Done');
+            }
+        });
+        promises.push(p);
     }
 }
 

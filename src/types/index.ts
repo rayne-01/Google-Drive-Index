@@ -289,8 +289,10 @@ export interface EncryptedFileData {
 
 export interface FrontendModel {
   is_search_page: boolean;
+  is_global_search?: boolean;
   q?: string;
   root_type: DriveRootType;
+  total_drives?: number;
 }
 
 // ============================================================================

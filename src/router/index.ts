@@ -8,7 +8,7 @@ import { initDrives, getDrive, getAllDrives, GoogleDrive } from '../services/dri
 import { validateSession, handleLogin, handleSignup, handleLogout, requiresAuth } from '../services/auth';
 import { encryptString, decryptString, generateDownloadLink, verifyDownloadLink } from '../utils/crypto';
 import { jsonResponse, htmlResponse, redirectResponse } from '../utils/helpers';
-import { getMainHTML, getHomepageHTML, getLoginHTML, getErrorHTML, getBlockedHTML } from '../templates';
+import { getMainHTML, getHomepageHTML, getLoginHTML, getErrorHTML, getBlockedHTML, getGlobalSearchHTML } from '../templates';
 import { handleAdminRequest } from '../admin';
 import { handleSetup, isSetupRequired } from '../setup';
 import type { Env, DriveFile, ListRequestBody, SearchRequestBody } from '../types';
@@ -110,6 +110,7 @@ async function loadConfigFromD1(env: Env): Promise<void> {
         case 'security.crypto_key': (config as any).crypto_base_key = value; break;
         case 'security.hmac_key': (config as any).hmac_base_key = value; break;
         case 'security.file_link_expiry': config.auth.file_link_expiry = parseInt(value) || 7; break;
+        case 'auth.search_all_drives': config.auth.search_all_drives = value === 'true'; break;
       }
     }
 
@@ -248,6 +249,15 @@ export async function handleRequest(request: Request, env: Env): Promise<Respons
     // Homepage
     if (path === '/') {
       return htmlResponse(getHomepageHTML());
+    }
+
+    // Global search across all drives
+    if (path === '/search') {
+      if (!config.auth.search_all_drives) {
+        return redirectResponse('/0:search' + (url.search || ''));
+      }
+      const q = url.searchParams.get('q')?.replace(/['"]/g, '') || '';
+      return htmlResponse(getGlobalSearchHTML(q));
     }
 
     // Download handler

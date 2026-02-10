@@ -74,8 +74,8 @@ export function getHomepageHTML(): string {
           <li class="nav-item"><a class="nav-link" href="/">${ui.nav_link_1}</a></li>
           <li class="nav-item"><a class="nav-link" href="${ui.contact_link}" target="_blank">${ui.nav_link_4}</a></li>
         </ul>
-        <form class="d-flex" method="get" action="/0:search">
-          <input class="form-control me-2" name="q" type="search" placeholder="Search" required>
+        <form class="d-flex" method="get" action="${auth.search_all_drives ? '/search' : '/0:search'}">
+          <input class="form-control me-2" name="q" type="search" placeholder="Search${auth.search_all_drives ? ' All Drives' : ''}" required>
           <button class="${ui.search_button_class}" type="submit">Search</button>
         </form>
       </div>
@@ -157,4 +157,40 @@ export function getErrorHTML(status: number, message: string): string {
 
 export function getBlockedHTML(): string {
   return getErrorHTML(403, 'Access Denied - Your region or network is blocked.');
+}
+
+export function getGlobalSearchHTML(q: string = ''): string {
+  const appJs = config.environment === 'production' ? '/app.js' : '/app.js';
+  const totalDrives = auth.roots.length;
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>${auth.siteName} - Search${q ? ': ' + q : ''}</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="${ui.favicon}">
+  <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.0/dist/${ui.theme}/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <style>
+    a{color:${ui.css_a_tag_color}}p{color:${ui.css_p_tag_color}}
+    .loading{position:fixed;z-index:999;height:2em;width:2em;overflow:show;margin:auto;top:0;left:0;bottom:0;right:0}
+    .loading:before{content:'';display:block;position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(rgba(20,20,20,.8),rgba(0,0,0,.8))}
+  </style>
+  <script>
+    window.drive_names=${JSON.stringify(auth.roots.map(r=>r.name))};
+    window.MODEL=${JSON.stringify({ is_search_page: true, is_global_search: true, q, root_type: 0, total_drives: totalDrives })};
+    window.current_drive_order=0;
+    window.UI=${JSON.stringify(ui)};
+    window.player_config=${JSON.stringify(player)};
+    window.download_mode='${config.download_mode}';
+  </script>
+</head>
+<body></body>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.0/dist/jquery.min.js"></script>
+<script src="${appJs}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked@9.0.0/lib/marked.umd.min.js"></script>
+</html>`;
 }
