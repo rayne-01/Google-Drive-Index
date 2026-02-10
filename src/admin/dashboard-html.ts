@@ -19,8 +19,6 @@ export function getAdminDashboardHTML(origin: string): string {
 .sb .nav-link i{font-size:18px;width:24px;text-align:center}
 .sb-footer{padding:12px 8px;margin-top:auto;border-top:1px solid rgba(255,255,255,.1)}
 .sb-footer .btn{width:100%;margin-bottom:6px;display:flex;align-items:center;gap:8px;justify-content:center}
-.sb-toggle{position:absolute;top:12px;right:-14px;width:28px;height:28px;border-radius:50%;background:#fff;border:1px solid #ddd;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:101;box-shadow:0 2px 8px rgba(0,0,0,.15)}
-.sb.collapsed .sb-toggle{transform:rotate(180deg)}
 .main{margin-left:var(--sw);padding:24px;min-height:100vh;transition:margin-left .25s}
 .main.expanded{margin-left:var(--sc)}
 .card{border:none;border-radius:12px;box-shadow:0 1px 8px rgba(0,0,0,.06)}
@@ -30,8 +28,7 @@ export function getAdminDashboardHTML(origin: string): string {
 @media(max-width:768px){.sb{width:var(--sc)}.sb .nav-text,.sb .brand h5,.sb .brand small,.sb-footer .btn span{display:none}.main{margin-left:var(--sc)}}
 </style></head><body>
 <div id=tc></div>
-<div class=sb id=sidebar><div class=sb-toggle onclick=toggleSidebar()><i class="bi bi-chevron-left"></i></div>
-<div class=brand><i class="bi bi-gear-fill" style="font-size:24px"></i><div><h5>Admin</h5><small class=text-muted>Drive Index</small></div></div>
+<div class=sb id=sidebar><div class=brand><i class="bi bi-gear-fill" style="font-size:24px;cursor:pointer" onclick="toggleSidebar()"></i><div><h5>Admin</h5><small style="color:#94a3b8">Drive Index</small></div></div>
 <nav class="nav flex-column mt-2">
 <a class="nav-link active" href=# data-tab=dashboard><i class="bi bi-speedometer2"></i><span class=nav-text>Dashboard</span></a>
 <a class="nav-link" href=# data-tab=credentials><i class="bi bi-person-badge"></i><span class=nav-text>Credentials</span></a>
