@@ -144,27 +144,59 @@ async function apiGetDrives(env: Env): Promise<Response> {
   return jsonResponse({ drives: result.results || [] });
 }
 
+async function resolveRootId(driveId: string, credentialId: number | null, env: Env): Promise<string> {
+  if (driveId !== 'root') return driveId;
+  try {
+    let clientId: string | undefined, clientSecret: string | undefined, refreshToken: string | undefined;
+    if (credentialId) {
+      const cred = await env.DB.prepare('SELECT client_id, client_secret, refresh_token FROM oauth_credentials WHERE id=?')
+        .bind(credentialId).first<{client_id:string;client_secret:string;refresh_token:string}>();
+      if (cred) { clientId = cred.client_id; clientSecret = cred.client_secret; refreshToken = cred.refresh_token; }
+    }
+    if (!clientId) {
+      clientId = (await env.DB.prepare("SELECT value FROM config WHERE key='auth.client_id'").first<{value:string}>())?.value;
+      clientSecret = (await env.DB.prepare("SELECT value FROM config WHERE key='auth.client_secret'").first<{value:string}>())?.value;
+      refreshToken = (await env.DB.prepare("SELECT value FROM config WHERE key='auth.refresh_token'").first<{value:string}>())?.value;
+    }
+    if (!clientId || !clientSecret || !refreshToken) return driveId;
+    const tokenRes = await fetch('https://www.googleapis.com/oauth2/v4/token', {
+      method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `client_id=${encodeURIComponent(clientId)}&client_secret=${encodeURIComponent(clientSecret)}&refresh_token=${encodeURIComponent(refreshToken)}&grant_type=refresh_token`
+    });
+    const tokenData = await tokenRes.json() as any;
+    if (!tokenData.access_token) return driveId;
+    const res = await fetch('https://www.googleapis.com/drive/v3/files/root?fields=id', { headers: { Authorization: `Bearer ${tokenData.access_token}` } });
+    const data = await res.json() as any;
+    return data.id || driveId;
+  } catch { return driveId; }
+}
+
 async function apiAddDrive(body: any, env: Env): Promise<Response> {
   await ensureTables(env);
   if (!body.drive_id || !body.name) return jsonResponse({ error: 'drive_id and name required' }, 400);
   const authType = body.auth_type || 'oauth';
   const credentialId = body.credential_id || null;
+  // Auto-resolve "root" to actual root folder ID
+  const resolvedDriveId = await resolveRootId(body.drive_id, credentialId, env);
   const maxOrder = await env.DB.prepare('SELECT MAX(order_index) as mx FROM drives').first<{mx:number}>();
   await env.DB.prepare(
     'INSERT INTO drives (drive_id, name, order_index, protect_file_link, enabled, auth_type, credential_id) VALUES (?, ?, ?, ?, 1, ?, ?)'
-  ).bind(body.drive_id, body.name, (maxOrder?.mx ?? -1) + 1, body.protect_file_link ? 1 : 0, authType, credentialId).run();
-  return jsonResponse({ ok: true });
+  ).bind(resolvedDriveId, body.name, (maxOrder?.mx ?? -1) + 1, body.protect_file_link ? 1 : 0, authType, credentialId).run();
+  return jsonResponse({ ok: true, resolved_id: resolvedDriveId !== body.drive_id ? resolvedDriveId : undefined });
 }
 
 async function apiUpdateDrive(body: any, env: Env): Promise<Response> {
   if (!body.id) return jsonResponse({ error: 'id required' }, 400);
+  const credentialId = body.credential_id || null;
+  // Auto-resolve "root" to actual root folder ID
+  const resolvedDriveId = await resolveRootId(body.drive_id, credentialId, env);
   await env.DB.prepare(
     'UPDATE drives SET name=?, drive_id=?, protect_file_link=?, enabled=?, auth_type=?, credential_id=? WHERE id=?'
   ).bind(
-    body.name, body.drive_id, body.protect_file_link ? 1 : 0, body.enabled ? 1 : 0,
-    body.auth_type || 'oauth', body.credential_id || null, body.id
+    body.name, resolvedDriveId, body.protect_file_link ? 1 : 0, body.enabled ? 1 : 0,
+    body.auth_type || 'oauth', credentialId, body.id
   ).run();
-  return jsonResponse({ ok: true });
+  return jsonResponse({ ok: true, resolved_id: resolvedDriveId !== body.drive_id ? resolvedDriveId : undefined });
 }
 
 async function apiDeleteDrive(body: any, env: Env): Promise<Response> {
