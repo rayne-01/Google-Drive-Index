@@ -492,7 +492,17 @@ async function handleFallback(request: Request, drive: GoogleDrive, userIp: stri
   const decryptedId = await decryptString(body.id || '');
 
   if (body.type === 'folder') {
-    const result = await drive.listFilesById(decryptedId, body.page_token || undefined, body.page_index || 0);
+    // Try all drives to list this folder
+    const allDrives = getAllDrives();
+    let result = null;
+    for (const d of allDrives) {
+      try {
+        const r = await d.listFilesById(decryptedId, body.page_token || undefined, body.page_index || 0);
+        if (r.data.files.length > 0) { result = r; break; }
+        if (!result) result = r; // Keep first result even if empty
+      } catch { /* try next */ }
+    }
+    if (!result) result = await drive.listFilesById(decryptedId, body.page_token || undefined, body.page_index || 0);
     const encryptedFiles = await Promise.all(result.data.files.map(async (file) => {
       const encryptedId = await encryptString(file.id);
       const encryptedDriveId = file.driveId ? await encryptString(file.driveId) : '';
@@ -504,7 +514,15 @@ async function handleFallback(request: Request, drive: GoogleDrive, userIp: stri
     return jsonResponse({ ...result, data: { files: encryptedFiles } });
   }
 
-  const file = await drive.findItemById(decryptedId);
+  // Try all drives to find this file
+  let file = null;
+  const allDrives2 = getAllDrives();
+  for (const d of allDrives2) {
+    try {
+      const f = await d.findItemById(decryptedId);
+      if (f?.name) { file = f; break; }
+    } catch { /* try next */ }
+  }
   if (!file) {
     return jsonResponse({ error: 'File not found' }, 404);
   }
@@ -522,18 +540,20 @@ async function handleFindPath(request: Request, drive: GoogleDrive, url: URL): P
     return htmlResponse(getErrorHTML(400, 'Missing ID'), 400);
   }
 
-  try {
-    const result = await drive.findPathById(id);
-    if (!result) {
-      const encryptedId = await encryptString(id);
-      return redirectResponse(`/fallback?id=${encryptedId}`);
-    }
-
-    const [path, prefix] = result;
-    const fullPath = `/${prefix}:${path}${view ? '?a=view' : ''}`;
-    return redirectResponse(fullPath);
-  } catch {
-    const encryptedId = await encryptString(id);
-    return redirectResponse(`/fallback?id=${encryptedId}`);
+  // Try ALL drives to find the file path, not just the one from URL
+  const allDrives = getAllDrives();
+  for (const d of allDrives) {
+    try {
+      const result = await d.findPathById(id);
+      if (result) {
+        const [path, prefix] = result;
+        const fullPath = `/${prefix}:${path}${view ? '?a=view' : ''}`;
+        return redirectResponse(fullPath);
+      }
+    } catch { /* try next drive */ }
   }
+
+  // None of the drives found it - use fallback with first drive that can access it
+  const encryptedId = await encryptString(id);
+  return redirectResponse(`/fallback?id=${encryptedId}`);
 }
