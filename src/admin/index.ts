@@ -502,6 +502,36 @@ async function apiAddServiceAccount(body: any, env: Env): Promise<Response> {
   } catch { return jsonResponse({ error: 'Invalid JSON' }, 400); }
 }
 
+async function apiBulkDeleteDrives(body: any, env: Env): Promise<Response> {
+  if (!body.ids || !Array.isArray(body.ids) || body.ids.length === 0) return jsonResponse({ error: 'ids array required' }, 400);
+  const stmts = body.ids.map((id: number) => env.DB.prepare('DELETE FROM drives WHERE id=?').bind(id));
+  for (let i = 0; i < stmts.length; i += 50) { await env.DB.batch(stmts.slice(i, i + 50)); }
+  return jsonResponse({ ok: true, deleted: body.ids.length });
+}
+
+async function apiBulkDeleteOAuthCreds(body: any, env: Env): Promise<Response> {
+  if (!body.ids || !Array.isArray(body.ids) || body.ids.length === 0) return jsonResponse({ error: 'ids array required' }, 400);
+  // Check if any drives reference these credentials
+  for (const id of body.ids) {
+    const usage = await env.DB.prepare("SELECT COUNT(*) as cnt FROM drives WHERE auth_type='oauth' AND credential_id=?").bind(id).first<{cnt:number}>();
+    if (usage && usage.cnt > 0) return jsonResponse({ error: 'Cannot delete credential #' + id + ': ' + usage.cnt + ' drive(s) use it' }, 400);
+  }
+  const stmts = body.ids.map((id: number) => env.DB.prepare('DELETE FROM oauth_credentials WHERE id=?').bind(id));
+  for (let i = 0; i < stmts.length; i += 50) { await env.DB.batch(stmts.slice(i, i + 50)); }
+  return jsonResponse({ ok: true, deleted: body.ids.length });
+}
+
+async function apiBulkDeleteServiceAccounts(body: any, env: Env): Promise<Response> {
+  if (!body.ids || !Array.isArray(body.ids) || body.ids.length === 0) return jsonResponse({ error: 'ids array required' }, 400);
+  for (const id of body.ids) {
+    const usage = await env.DB.prepare("SELECT COUNT(*) as cnt FROM drives WHERE auth_type='service_account' AND credential_id=?").bind(id).first<{cnt:number}>();
+    if (usage && usage.cnt > 0) return jsonResponse({ error: 'Cannot delete SA #' + id + ': ' + usage.cnt + ' drive(s) use it' }, 400);
+  }
+  const stmts = body.ids.map((id: number) => env.DB.prepare('DELETE FROM service_accounts WHERE id=?').bind(id));
+  for (let i = 0; i < stmts.length; i += 50) { await env.DB.batch(stmts.slice(i, i + 50)); }
+  return jsonResponse({ ok: true, deleted: body.ids.length });
+}
+
 async function apiDeleteServiceAccount(body: any, env: Env): Promise<Response> {
   if (!body.id) return jsonResponse({ error: 'id required' }, 400);
   // Check if any drives reference this SA
@@ -555,16 +585,19 @@ export async function handleAdminRequest(request: Request, env?: Env): Promise<R
       case '/admin/api/drives/fetch-root': return apiFetchRootId(body, env);
       case '/admin/api/drives/list-shared': return apiListSharedDrives(body, env);
       case '/admin/api/drives/bulk-add': return apiBulkAddDrives(body, env);
+      case '/admin/api/drives/bulk-delete': return apiBulkDeleteDrives(body, env);
       case '/admin/api/config/set': return apiSetConfig(body, env);
       case '/admin/api/config/delete': return apiDeleteConfig(body, env);
       case '/admin/api/config/bulk': return apiBulkSetConfig(body, env);
       case '/admin/api/oauth-credentials/add': return apiAddOAuthCred(body, env);
       case '/admin/api/oauth-credentials/delete': return apiDeleteOAuthCred(body, env);
+      case '/admin/api/oauth-credentials/bulk-delete': return apiBulkDeleteOAuthCreds(body, env);
       case '/admin/api/google-login/save': return apiSaveGoogleLogin(body, env);
       case '/admin/api/security/save': return apiSaveSecurity(body, env);
       case '/admin/api/security/regenerate-key': return apiRegenerateKey(body, env);
       case '/admin/api/service-accounts/add': return apiAddServiceAccount(body, env);
       case '/admin/api/service-accounts/delete': return apiDeleteServiceAccount(body, env);
+      case '/admin/api/service-accounts/bulk-delete': return apiBulkDeleteServiceAccounts(body, env);
     }
   }
   return jsonResponse({ error: 'Not found' }, 404);
